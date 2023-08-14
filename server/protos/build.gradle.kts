@@ -1,6 +1,11 @@
 plugins {
-    java
+    kotlin("jvm")
+    `java-library`
     alias(libs.plugins.protobuf)
+}
+
+kotlin { 
+    jvmToolchain(17) 
 }
 
 protobuf {

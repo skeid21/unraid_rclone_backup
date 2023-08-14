@@ -1,11 +1,14 @@
 plugins {
-    kotlin("jvm") version "1.9.0" 
+    kotlin("jvm")
     application
     alias(libs.plugins.ktfmt)
 }
 
 dependencies {
     implementation(project(":protos"))
+
+    implementation(libs.bundles.protobuf)
+    implementation(libs.bundles.grpc)
 
     testImplementation(libs.bundles.test)
 }

@@ -12,6 +12,10 @@ rootProject.name = "server"
 include("app")
 include("protos")
 
+plugins {
+    kotlin("jvm") version "1.9.0" apply false
+}
+
 dependencyResolutionManagement {
     repositories {
         mavenCentral()
@@ -23,11 +27,12 @@ dependencyResolutionManagement {
             version("grpc", "1.57.1")
             library("grpc-stub", "io.grpc", "grpc-stub").versionRef("grpc")
             library("grpc-protobuf", "io.grpc", "grpc-protobuf").versionRef("grpc")
+            library("grpc-netty", "io.grpc", "grpc-netty").versionRef("grpc")
 
             version("grpcKotlin", "1.3.0")
             library("grpc-kotlin-stub", "io.grpc", "grpc-kotlin-stub").versionRef("grpcKotlin")
 
-            bundle("grpc", listOf("grpc-stub", "grpc-protobuf", "grpc-kotlin-stub", "grpc-kotlin-stub"))
+            bundle("grpc", listOf("grpc-stub", "grpc-protobuf", "grpc-netty", "grpc-kotlin-stub", "grpc-kotlin-stub"))
 
             version("protobuf", "3.24.0-RC3")
             library("protobuf-java-util", "com.google.protobuf", "protobuf-java-util").versionRef("protobuf")

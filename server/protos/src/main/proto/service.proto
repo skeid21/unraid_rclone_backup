@@ -1,7 +1,6 @@
 syntax = "proto3";
 
-option java_package = "org.temp.unraid.backups";
-option java_outer_classname = "BackupServiceProto";
+option java_package = "server";
 
 import "google/protobuf/empty.proto";
 

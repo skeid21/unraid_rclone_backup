@@ -3,14 +3,14 @@
  */
 package server
 
-class Server {
-  val greeting: String
-    get() {
-      return "Hello World!"
-    }
-  
-}
+import io.grpc.ServerBuilder
+
+fun buildServer(port: Int): io.grpc.Server =
+    ServerBuilder.forPort(port).addService(BackupService()).build()
 
 fun main() {
-  println(Server().greeting)
+  val port = System.getenv("PORT")?.toInt() ?: 50051
+  val server = buildServer(port)
+  server.start()
+  server.awaitTermination()
 }
