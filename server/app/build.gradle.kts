@@ -9,6 +9,7 @@ dependencies {
 
     implementation(libs.bundles.protobuf)
     implementation(libs.bundles.grpc)
+    implementation(libs.bundles.shared)
 
     testImplementation(libs.bundles.test)
 }

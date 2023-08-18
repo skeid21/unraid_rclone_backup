@@ -3,14 +3,21 @@
  */
 package server
 
+import com.google.common.flogger.FluentLogger
 import io.grpc.ServerBuilder
 
+private val logger = FluentLogger.forEnclosingClass();
 fun buildServer(port: Int): io.grpc.Server =
     ServerBuilder.forPort(port).addService(BackupService()).build()
 
 fun main() {
-  val port = System.getenv("PORT")?.toInt() ?: 50051
-  val server = buildServer(port)
-  server.start()
-  server.awaitTermination()
+  logger.atInfo().log("Starting server")
+  try {
+    val port = System.getenv("PORT")?.toInt() ?: 9090
+    val server = buildServer(port)
+    server.start()
+    server.awaitTermination()
+  } catch (t: Throwable) {
+    logger.atSevere().withCause(t).log("Server exiting with error")
+  }
 }

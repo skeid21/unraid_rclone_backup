@@ -44,6 +44,13 @@ dependencyResolutionManagement {
             version("kotlinx", "1.7.3")
             library("kotlinx-coroutines-core", "org.jetbrains.kotlinx", "kotlinx-coroutines-core").versionRef("kotlinx")
 
+            version("flogger", "0.7.4")
+            library("flogger", "com.google.flogger", "flogger").versionRef("flogger")
+            library("flogger-backend", "com.google.flogger", "flogger-system-backend").versionRef("flogger")
+
+
+            bundle("shared", listOf("flogger", "flogger-backend"))
+
             // Testing specific
             version ("junit", "5.10.0")
             library("junit", "org.junit.jupiter", "junit-jupiter").versionRef("junit")
