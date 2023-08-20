@@ -20,7 +20,7 @@ fun HTML.root(block: ARTICLE.() -> Unit) {
   head {
     title { +"UnClone" }
     link {
-     href = "https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+      href = "https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
       rel = "stylesheet"
     }
     link {
@@ -31,28 +31,36 @@ fun HTML.root(block: ARTICLE.() -> Unit) {
       src = "https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"
     }
     script {
-     +"""
+      +"""
        function deleteResource(resourceName) {
           fetch(`v1/${'$'}{resourceName}`, {method: 'DELETE'});
           location.reload();
        }
-     """.trimIndent()
+     """
+          .trimIndent()
     }
   }
   body {
     nav {
-      div(classes="nav-wrapper indigo") {
-         a(classes="brand-logo") {
-           href="#"
-           +"UnClone" }
+      div(classes = "nav-wrapper indigo") {
+        a(classes = "brand-logo") {
+          href = "#"
+          +"UnClone"
+        }
         ul(classes = "right hide-on-med-and-down") {
           id = "nav-mobile"
-          li { a { href="/backups"
-            +"Backups"
-          } }
-          li { a { href="/settings"
+          li {
+            a {
+              href = "/backups"
+              +"Backups"
+            }
+          }
+          li {
+            a {
+              href = "/settings"
               +"Settings"
-          } }
+            }
+          }
         }
       }
     }

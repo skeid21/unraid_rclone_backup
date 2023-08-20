@@ -9,7 +9,6 @@ import io.ktor.server.routing.Routing
 import io.ktor.server.routing.contentType
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
-import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import server.injection.with
 import server.services.BackupService
@@ -47,6 +46,5 @@ fun Routing.installBackupIngress() {
         }
       }
     }
-
   }
 }
