@@ -7,6 +7,7 @@ plugins {
 dependencies {
     implementation(libs.bundles.ktor)
     implementation(libs.bundles.shared)
+    implementation(libs.bundles.persistence)
 
     testImplementation(libs.bundles.test)
 }

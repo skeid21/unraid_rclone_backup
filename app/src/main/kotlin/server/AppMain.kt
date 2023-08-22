@@ -5,35 +5,49 @@ package server
 
 import com.google.common.flogger.FluentLogger
 import io.ktor.serialization.gson.gson
+import io.ktor.server.application.Application
 import io.ktor.server.application.install
+import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.server.netty.NettyApplicationEngine
 import io.ktor.server.plugins.autohead.AutoHeadResponse
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.defaultheaders.DefaultHeaders
+import org.jetbrains.exposed.sql.Database
+import server.persistence.initDatabaseConnection
 
 private val logger = FluentLogger.forEnclosingClass()
 
-fun main() {
+private var server: ApplicationEngine? = null
+fun startServer() {
   logger.atInfo().log("Starting server")
 
   try {
-    embeddedServer(Netty, host = "0.0.0.0", port = 8080) {
-          install(ContentNegotiation) { gson() }
 
-          install(DefaultHeaders) {
-            header("X-Engine", "Ktor") // will send this header with each response
-          }
-          install(AutoHeadResponse)
-          install(CallLogging)
+    initDatabaseConnection()
 
-          installRoutes()
-        }
-        .start(wait = true)
+    server = embeddedServer(Netty, host = "0.0.0.0", port = 8080) {
+      install(ContentNegotiation) { gson() }
+
+      install(DefaultHeaders) {
+        header("X-Engine", "Ktor") // will send this header with each response
+      }
+      install(AutoHeadResponse)
+      install(CallLogging)
+
+      installRoutes()
+    }
+
+    server!!.start(wait = true)
 
     logger.atInfo().log("Server has exited")
   } catch (t: Throwable) {
     logger.atSevere().withCause(t).log("Server exited with an error")
+    throw t
   }
 }
+
+fun main() = startServer()
+

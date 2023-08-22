@@ -25,13 +25,13 @@ private fun UL.backupListItem(backup: Backup) {
       }
       div(classes = "card-action") {
         a(classes = "btn waves-effect indigo lighten-2") {
-          href = backup.name
+          href = backup.name.value
           i(classes = "material-icons right") { +"edit" }
           +"Edit"
         }
 
         button(classes = "btn waves-effect indigo lighten-2") {
-          onClick = """deleteResource('${backup.name}')"""
+          onClick = """deleteResource('${backup.name.value}')"""
           i(classes = "material-icons right") { +"delete" }
           +"Delete"
         }

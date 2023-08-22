@@ -11,6 +11,7 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import server.injection.with
+import server.models.BackupName
 import server.services.BackupService
 
 fun Routing.installBackupIngress() {
@@ -26,7 +27,7 @@ fun Routing.installBackupIngress() {
           if (id.isNullOrBlank()) {
             call.respond(HttpStatusCode.BadRequest, "Invalid path parameter backup_id")
           } else {
-            when (get(id)) {
+            when (get(id.idToName())) {
               null -> call.response.status(HttpStatusCode.NotFound)
               else -> call.respond(it)
             }
@@ -41,10 +42,13 @@ fun Routing.installBackupIngress() {
         if (id.isNullOrBlank()) {
           call.respond(HttpStatusCode.BadRequest, "Invalid path parameter backup_id")
         } else {
-          delete(id)
+          delete(id.idToName())
           call.response.status(HttpStatusCode.OK)
         }
       }
     }
   }
 }
+
+
+private fun String.idToName() = BackupName("backups/$this")

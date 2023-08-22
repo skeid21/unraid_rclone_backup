@@ -24,6 +24,9 @@ dependencyResolutionManagement {
         create("libs") {
             version("kotlin", "1.9.0")
 
+            //
+            //Ktor
+            //
             version("ktor", "2.3.3")
             library("ktor-server-core", "io.ktor", "ktor-server-core").versionRef("ktor")
             library("ktor-server-netty", "io.ktor", "ktor-server-netty").versionRef("ktor")
@@ -44,10 +47,15 @@ dependencyResolutionManagement {
               "ktor-server-call-logging",
               "ktor-serialization-gson"))
 
-
+            //
+            //Kotlinx
+            //
             version("kotlinx", "1.7.3")
             library("kotlinx-coroutines-core", "org.jetbrains.kotlinx", "kotlinx-coroutines-core").versionRef("kotlinx")
 
+            //
+            // Shared
+            //
             version("flogger", "0.7.4")
             library("flogger", "com.google.flogger", "flogger").versionRef("flogger")
             library("flogger-slf4j-backend", "com.google.flogger", "flogger-slf4j-backend").versionRef("flogger")
@@ -60,7 +68,26 @@ dependencyResolutionManagement {
 
             bundle("shared", listOf("flogger", "flogger-backend", "flogger-slf4j-backend", "logback-core", "logback-classic", "guice"))
 
-            // Testing specific
+            //
+            //persistence
+            //
+            version("exposed", "0.42.0")
+            library("exposed-core", "org.jetbrains.exposed", "exposed-core").versionRef("exposed")
+            library("exposed-jdbc", "org.jetbrains.exposed", "exposed-jdbc").versionRef("exposed")
+            library("exposed-dao", "org.jetbrains.exposed", "exposed-dao").versionRef("exposed")
+            library("exposed-kotlin-datetime", "org.jetbrains.exposed", "exposed-kotlin-datetime").versionRef("exposed")
+            library("sqlite-jbdc", "org.xerial", "sqlite-jdbc").version("3.42.0.0")
+
+            bundle("persistence", listOf(
+                "exposed-core",
+                "exposed-jdbc",
+                "exposed-dao",
+                "exposed-kotlin-datetime",
+                "sqlite-jbdc"))
+
+            //
+            // Testing
+            //
             version ("junit", "5.10.0")
             library("junit", "org.junit.jupiter", "junit-jupiter").versionRef("junit")
             library("junit-engine", "org.junit.jupiter", "junit-jupiter-engine").versionRef("junit")
@@ -73,8 +100,9 @@ dependencyResolutionManagement {
              
             bundle("test", listOf("junit", "junit-engine", "kotlin-test", "kotlin-test-junit", "ktor-server-test-host", "truth"))
 
-            // Plugins 
-            plugin("protobuf", "com.google.protobuf").version("0.9.4")
+            //
+            // Plugins
+            //
             plugin("ktfmt", "com.ncorti.ktfmt.gradle" ).version("0.13.0")
         }
     }
