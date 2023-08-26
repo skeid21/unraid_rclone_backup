@@ -9,6 +9,8 @@ import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
+import server.config
+import server.databaseFilePath
 
 fun initDatabaseConnection() {
 	ensureDdFileDirectory()
@@ -16,10 +18,10 @@ fun initDatabaseConnection() {
 	initTables()
 }
 
-private const val databaseFilePath = "/tmp/data.db"
 private fun ensureDdFileDirectory() {
-	if (!Files.exists(Path.of(databaseFilePath).parent))	 {
-		Files.createDirectories(Path.of(databaseFilePath).parent)
+	val dbPath = Path.of(config.databaseFilePath).parent
+	if (!Files.exists(dbPath))	 {
+		Files.createDirectories(dbPath)
 	}
 }
 
@@ -32,7 +34,7 @@ private fun initTables() {
 
 private fun connectToDatabase() {
 	// In file
-	Database.connect("jdbc:sqlite:$databaseFilePath", "org.sqlite.JDBC")
+	Database.connect("jdbc:sqlite:${config.databaseFilePath}", "org.sqlite.JDBC")
 	// In memory
 //	Database.connect("jdbc:sqlite:file:test?mode=memorycache=shared", "org.sqlite.JDBC")
 

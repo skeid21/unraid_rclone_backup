@@ -24,5 +24,13 @@ application {
     // Define the main class for the application.
     mainClass.set("server.AppMainKt")
     //enable development mode for enhanced error page reponses and hot reloading
-    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=true")
+    applicationDefaultJvmArgs = listOf(
+        "-Dio.ktor.development=true",
+        "-Dapplication.sqlite.data_path=/tmp/com.unclone/sqlite/data.db"
+    )
+    sourceSets {
+        main {
+            resources.srcDir("/src/main/resources/dev")
+        }
+    }
 }
