@@ -3,7 +3,6 @@ package server.pages.views
 import kotlinx.html.ARTICLE
 import kotlinx.html.UL
 import kotlinx.html.a
-import kotlinx.html.br
 import kotlinx.html.button
 import kotlinx.html.classes
 import kotlinx.html.div
@@ -20,20 +19,17 @@ import server.services.BackupService
 private fun UL.backupListItem(backup: Backup) {
   li(classes = "collection-item") {
     div(classes = "card small") {
-      div(classes = "card-content") {
-        div(classes = "card-title") { +backup.displayName }
-        p { +"Last run: Today" }
-        p { +"Created: Jun 12th, 2023" }
+      a {
+        style = "text-decoration:none; color:inherit"
+        href = "/${backup.name.value}"
+        div(classes = "card-content") {
+          div(classes = "card-title") { +backup.displayName }
+          p { +"Last run: Today" }
+          p { +"Created: Jun 12th, 2023" }
+        }
       }
       div(classes = "card-action") {
-        a(classes = "btn waves-effect indigo lighten-2") {
-          style = "margin:10px"
-          href = backup.name.value
-          i(classes = "material-icons right") { +"edit" }
-          +"Edit"
-        }
-
-        button(classes = "btn waves-effect indigo lighten-2") {
+        button(classes = "right btn waves-effect indigo lighten-2") {
           style = "margin:10px"
           onClick = """deleteResource('${backup.name.value}')"""
           i(classes = "material-icons right") { +"delete" }
@@ -51,6 +47,6 @@ fun ARTICLE.backupListView() {
     href = "backups//new"
     i(classes = "material-icons") { +"add" }
   }
-  br {}
+
   ul(classes = "collection") { backups.forEach { backupListItem(it) } }
 }

@@ -45,8 +45,8 @@ fun HTML.root(block: ARTICLE.() -> Unit) {
     nav {
       div(classes = "nav-wrapper indigo") {
         a(classes = "brand-logo") {
-          style ="margin:5px"
-          href = "#"
+          style = "margin:5px"
+          href = "/"
           +"UnClone"
         }
         ul(classes = "right hide-on-med-and-down") {
@@ -67,7 +67,7 @@ fun HTML.root(block: ARTICLE.() -> Unit) {
       }
     }
     div {
-      style="margin:5px"
+      style = "margin:5px"
       article(block = block)
     }
   }
