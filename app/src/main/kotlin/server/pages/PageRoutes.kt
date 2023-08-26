@@ -10,12 +10,14 @@ import server.pages.templates.root
 import server.pages.views.backupDetailView
 import server.pages.views.backupEditView
 import server.pages.views.backupListView
+import server.pages.views.settingsView
 
 fun Routing.installIndexPageIngress() {
   // index.html
   get("/") { this.call.respondRedirect(permanent = false) { this.path("/backups") } }
 
   get("/backups") { this.call.respondHtml { root { backupListView() } } }
+  get("/settings") { this.call.respondHtml { root { settingsView() } } }
 
   get("/backups/{backup_id}") { call.respondHtml { root { backupDetailView() } } }
   get("/backups/{backup_id}/edit") { call.respondHtml { root { backupEditView(false) } } }

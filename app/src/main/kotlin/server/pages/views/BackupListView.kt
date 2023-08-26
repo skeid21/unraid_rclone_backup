@@ -5,11 +5,13 @@ import kotlinx.html.UL
 import kotlinx.html.a
 import kotlinx.html.br
 import kotlinx.html.button
+import kotlinx.html.classes
 import kotlinx.html.div
 import kotlinx.html.i
 import kotlinx.html.li
 import kotlinx.html.onClick
 import kotlinx.html.p
+import kotlinx.html.style
 import kotlinx.html.ul
 import server.injection.getInstance
 import server.models.Backup
@@ -25,12 +27,14 @@ private fun UL.backupListItem(backup: Backup) {
       }
       div(classes = "card-action") {
         a(classes = "btn waves-effect indigo lighten-2") {
+          style = "margin:10px"
           href = backup.name.value
           i(classes = "material-icons right") { +"edit" }
           +"Edit"
         }
 
         button(classes = "btn waves-effect indigo lighten-2") {
+          style = "margin:10px"
           onClick = """deleteResource('${backup.name.value}')"""
           i(classes = "material-icons right") { +"delete" }
           +"Delete"
@@ -42,7 +46,8 @@ private fun UL.backupListItem(backup: Backup) {
 
 fun ARTICLE.backupListView() {
   val backups = getInstance<BackupService>().list()
-  a(classes = "right btn-floating btn waves-effect waves-light indigo darken-2") {
+  a(classes = "btn-floating btn waves-effect waves-light indigo darken-2 ") {
+    style = "position: fixed; right:10px; bottom:10px"
     href = "backups//new"
     i(classes = "material-icons") { +"add" }
   }

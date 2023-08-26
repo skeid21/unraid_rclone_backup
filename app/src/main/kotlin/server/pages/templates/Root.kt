@@ -13,6 +13,7 @@ import kotlinx.html.li
 import kotlinx.html.link
 import kotlinx.html.nav
 import kotlinx.html.script
+import kotlinx.html.style
 import kotlinx.html.title
 import kotlinx.html.ul
 
@@ -44,6 +45,7 @@ fun HTML.root(block: ARTICLE.() -> Unit) {
     nav {
       div(classes = "nav-wrapper indigo") {
         a(classes = "brand-logo") {
+          style ="margin:5px"
           href = "#"
           +"UnClone"
         }
@@ -64,6 +66,9 @@ fun HTML.root(block: ARTICLE.() -> Unit) {
         }
       }
     }
-    article(block = block)
+    div {
+      style="margin:5px"
+      article(block = block)
+    }
   }
 }
