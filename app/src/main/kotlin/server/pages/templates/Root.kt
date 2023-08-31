@@ -31,15 +31,6 @@ fun HTML.root(block: ARTICLE.() -> Unit) {
     script {
       src = "https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"
     }
-    script {
-      +"""
-       function deleteResource(resourceName) {
-          fetch(`v1/${'$'}{resourceName}`, {method: 'DELETE'});
-          location.reload();
-       }
-     """
-          .trimIndent()
-    }
   }
   body {
     nav {

@@ -11,9 +11,6 @@ import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import server.config
 import server.databaseFilePath
-import server.injection.getInstance
-import server.models.Backup
-import server.models.asBackupName
 
 fun initDatabaseConnection() {
   ensureDdFileDirectory()
@@ -32,6 +29,7 @@ private fun initTables() {
   transaction {
     addLogger(StdOutSqlLogger)
     SchemaUtils.create(Backups)
+    SchemaUtils.createMissingTablesAndColumns(Backups)
   }
 }
 
@@ -44,13 +42,4 @@ private fun connectToDatabase() {
   // For both: set SQLite compatible isolation level, seE
   // https://github.com/JetBrains/Exposed/wiki/FAQ
   TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
-
-  val backupsDAL = getInstance<BackupsDAL>()
-  if (backupsDAL.get("backups/test1".asBackupName()) == null) {
-    backupsDAL.create(Backup("backups/test1".asBackupName(), "test1", "config"))
-  }
-
-  if (backupsDAL.get("backups/test2".asBackupName()) == null) {
-    backupsDAL.create(Backup("backups/test2".asBackupName(), "test2", "config"))
-  }
 }

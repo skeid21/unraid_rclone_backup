@@ -7,6 +7,8 @@ import kotlinx.html.p
 import kotlinx.html.style
 import server.injection.getInstance
 import server.models.BackupName
+import server.pages.BACKUP_EDIT
+import server.pages.withBackupId
 import server.services.BackupService
 
 fun ARTICLE.backupDetailView(backupName: BackupName) {
@@ -15,7 +17,7 @@ fun ARTICLE.backupDetailView(backupName: BackupName) {
 
   a(classes = "btn-floating btn waves-effect waves-light indigo darken-2 ") {
     style = "position: fixed; right:10px; bottom:10px"
-    href = "/${backupName.value}/edit"
+    href = BACKUP_EDIT.withBackupId(backupName)
     i(classes = "material-icons") { +"edit" }
   }
 }

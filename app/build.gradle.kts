@@ -13,7 +13,11 @@ dependencies {
 }
 
 tasks.test { 
-    useJUnitPlatform() 
+    useJUnitPlatform()
+    val buildDBPath = layout.buildDirectory.file("tmp/com.unclone/sqlite/data.db").get().asFile.path
+    jvmArgs = listOf(
+        "-Dapplication.sqlite.data_path=$buildDBPath"
+    )
 }
 
 kotlin { 

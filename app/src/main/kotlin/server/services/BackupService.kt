@@ -15,12 +15,16 @@ constructor(
     return backupsDAL.create(backup)
   }
 
+  fun get(backupName: BackupName): Backup? {
+    return backupsDAL.get(backupName)
+  }
+
   fun list(): List<Backup> {
     return backupsDAL.list()
   }
 
-  fun get(backupName: BackupName): Backup? {
-    return backupsDAL.get(backupName)
+  fun update(backup: Backup): Backup? {
+    return backupsDAL.update(backup)
   }
 
   fun delete(backupName: BackupName) {

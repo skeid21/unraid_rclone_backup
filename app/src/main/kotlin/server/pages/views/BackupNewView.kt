@@ -1,8 +1,9 @@
 package server.pages.views
 
 import kotlinx.html.ARTICLE
-import kotlinx.html.p
+import server.pages.BACKUP_NEW
+import server.pages.templates.backupForm
 
 fun ARTICLE.backupNewView() {
-  p { +"This is the new view" }
+  backupForm(null, BACKUP_NEW)
 }

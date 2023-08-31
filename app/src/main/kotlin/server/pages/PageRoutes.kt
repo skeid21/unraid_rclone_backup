@@ -1,11 +1,17 @@
 package server.pages
 
+import io.ktor.http.Parameters
 import io.ktor.http.path
 import io.ktor.server.application.call
 import io.ktor.server.html.respondHtml
+import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respondRedirect
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import server.injection.getInstance
+import server.models.Backup
+import server.models.BackupName
 import server.models.idToName
 import server.pages.templates.root
 import server.pages.views.backupDetailView
@@ -13,19 +19,82 @@ import server.pages.views.backupEditView
 import server.pages.views.backupListView
 import server.pages.views.backupNewView
 import server.pages.views.settingsView
+import server.services.BackupService
+
+const val BACKUPS = "/backups"
+const val SETTINGS = "/settings"
+const val BACKUP_DETAIL = "$BACKUPS/{backup_id}"
+const val BACKUP_EDIT = "$BACKUPS/{backup_id}/edit"
+const val BACKUP_DELETE = "$BACKUPS/{backup_id}/delete"
+const val BACKUP_NEW = "$BACKUPS//new"
+
+fun String.withBackupId(backupName: BackupName): String = replace("{backup_id}", backupName.id())
 
 fun Routing.installIndexPageIngress() {
-  // index.html
+  // index
   get("/") { this.call.respondRedirect(permanent = false) { this.path("/backups") } }
 
-  get("/backups") { this.call.respondHtml { root { backupListView() } } }
-  get("/settings") { this.call.respondHtml { root { settingsView() } } }
+  //
+  // -- Settings --
+  //
+  get(SETTINGS) { this.call.respondHtml { root { settingsView() } } }
 
-  get("/backups/{backup_id}") {
+  //
+  // -- Backups ---
+  //
+
+  //
+  // List
+  //
+  get(BACKUPS) { this.call.respondHtml { root { backupListView() } } }
+  get(BACKUP_DETAIL) {
     call.respondHtml { root { backupDetailView(call.parameters["backup_id"]!!.idToName()) } }
   }
-  get("/backups/{backup_id}/edit") {
+
+  //
+  // Edit
+  //
+  get(BACKUP_EDIT) {
     call.respondHtml { root { backupEditView(call.parameters["backup_id"]!!.idToName()) } }
   }
-  get("/backups//new") { call.respondHtml { root { backupNewView() } } }
+  post(BACKUP_EDIT) {
+    val backupName = call.parameters["backup_id"]!!.idToName()
+    val backup = call.receiveParameters().toBackup(backupName)
+
+    getInstance<BackupService>().update(backup)
+
+    call.respondRedirect("/backups")
+  }
+
+  //
+  // New
+  //
+  get(BACKUP_NEW) { call.respondHtml { root { backupNewView() } } }
+
+  post(BACKUP_NEW) {
+    val backup = call.receiveParameters().toBackup(null)
+    getInstance<BackupService>().create(backup)
+
+    call.respondRedirect("/backups", false)
+  }
+
+  //
+  // Delete
+  //
+  get(BACKUP_DELETE) {
+    getInstance<BackupService>().delete(call.parameters["backup_id"]!!.idToName())
+    call.respondRedirect("/backups", false)
+  }
+}
+
+fun Parameters.toBackup(backupName: BackupName?): Backup {
+
+  val displayName = this["displayName"].toString()
+  val name = backupName ?: displayName.idToName()
+
+  return Backup(
+      name = name,
+      displayName = displayName,
+      cronSchedule = this["cronSchedule"].toString(),
+      config = this["config"].toString())
 }
