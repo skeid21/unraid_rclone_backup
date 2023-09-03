@@ -12,7 +12,6 @@ import server.pages.withBackupId
 import server.services.BackupService
 
 fun ARTICLE.backupDetailView(backupName: BackupName) {
-  val backup = getInstance<BackupService>().get(backupName)
   p { +"this is the detail view" }
 
   a(classes = "btn-floating btn waves-effect waves-light indigo darken-2 ") {
