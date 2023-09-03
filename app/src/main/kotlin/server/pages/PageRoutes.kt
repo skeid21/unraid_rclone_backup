@@ -2,6 +2,7 @@ package server.pages
 
 import io.ktor.http.Parameters
 import io.ktor.http.path
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.html.respondHtml
 import io.ktor.server.request.receiveParameters
@@ -10,6 +11,7 @@ import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import server.injection.getInstance
+import server.injection.withInstance
 import server.models.Backup
 import server.models.BackupName
 import server.models.idToName
@@ -58,12 +60,14 @@ fun Routing.installIndexPageIngress() {
     call.respondHtml { root { backupEditView(call.parameters["backup_id"]!!.idToName()) } }
   }
   post(BACKUP_EDIT) {
-    val backupName = call.parameters["backup_id"]!!.idToName()
-    val backup = call.receiveParameters().toBackup(backupName)
+    withInstance<BackupService> {
+      val backupName = call.parameters["backup_id"]!!.idToName()
+      val backup = call.receiveParameters().toBackup(backupName)
 
-    getInstance<BackupService>().update(backup)
+      update(backup)
 
-    call.respondRedirect("/backups")
+      call.redirectToHome()
+    }
   }
 
   //
@@ -72,18 +76,21 @@ fun Routing.installIndexPageIngress() {
   get(BACKUP_NEW) { call.respondHtml { root { backupNewView() } } }
 
   post(BACKUP_NEW) {
-    val backup = call.receiveParameters().toBackup(null)
-    getInstance<BackupService>().create(backup)
+    withInstance<BackupService> {
+      val backup = call.receiveParameters().toBackup(null)
+      create(backup)
 
-    call.respondRedirect("/backups", false)
+      call.redirectToHome()
+    }
   }
 
   //
   // Delete
   //
   get(BACKUP_DELETE) {
-    getInstance<BackupService>().delete(call.parameters["backup_id"]!!.idToName())
-    call.respondRedirect("/backups", false)
+    withInstance<BackupService> {
+      delete(call.parameters["backup_id"]!!.idToName())
+    }
   }
 }
 
@@ -97,4 +104,8 @@ fun Parameters.toBackup(backupName: BackupName?): Backup {
       displayName = displayName,
       cronSchedule = this["cronSchedule"].toString(),
       config = this["config"].toString())
+}
+
+suspend fun ApplicationCall.redirectToHome() {
+  respondRedirect(BACKUPS, false)
 }
