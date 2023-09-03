@@ -8,10 +8,9 @@ import org.junit.jupiter.api.extension.ExtendWith
 import server.TestHarness
 import server.TestHarnessExtension
 import server.models.BackupStub
-import server.next
 
 @ExtendWith(TestHarnessExtension::class)
-class BackupsDalTest(private val harness: TestHarness) {
+class BackupsDalTest(harness: TestHarness) {
 
   private val subject = harness.getInstance<BackupsDAL>()
 

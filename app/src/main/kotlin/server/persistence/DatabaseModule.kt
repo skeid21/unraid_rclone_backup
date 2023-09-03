@@ -16,7 +16,6 @@ import server.config
 import server.databaseFilePath
 
 class DatabaseModule : AbstractModule() {
-
   @Provides
   @Singleton
   fun database(): Database {

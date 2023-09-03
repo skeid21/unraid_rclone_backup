@@ -15,7 +15,7 @@ import server.models.Backup
 import server.models.BackupStub
 
 @ExtendWith(TestHarnessExtension::class)
-class BackupServiceTest(private val harness: TestHarness) {
+class BackupServiceTest(harness: TestHarness) {
   private val subject = harness.getInstance<BackupService>()
 
   @Test
