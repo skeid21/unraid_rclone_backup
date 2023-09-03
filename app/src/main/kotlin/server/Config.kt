@@ -4,7 +4,6 @@ import java.util.Properties
 
 val config =
     Properties().apply {
-      //		load(javaClass.classLoader.getResourceAsStream("config.properties"))
       load(ClassLoader.getSystemClassLoader().getResourceAsStream("config.properties"))
       // allow comamnd line jvm args to override
       keys.forEach { key ->

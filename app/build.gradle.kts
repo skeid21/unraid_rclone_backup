@@ -8,6 +8,7 @@ dependencies {
     implementation(libs.bundles.ktor)
     implementation(libs.bundles.shared)
     implementation(libs.bundles.persistence)
+    implementation(libs.quartz)
 
     testImplementation(libs.bundles.test)
 }

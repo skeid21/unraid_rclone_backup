@@ -1,33 +1,19 @@
 package server.persistence
 
 import com.google.common.truth.Truth.assertThat
-import kotlin.random.Random
 import kotlin.test.assertFailsWith
 import org.jetbrains.exposed.exceptions.ExposedSQLException
-import org.junit.Rule
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import server.TestHarness
-import server.injection.getInstance
-import server.models.Backup
+import server.TestHarnessExtension
+import server.models.BackupStub
 import server.next
 
-class BackupsDalTest {
-  @Rule @JvmField val harness = TestHarness()
+@ExtendWith(TestHarnessExtension::class)
+class BackupsDalTest(private val harness: TestHarness) {
 
-  private val subject = getInstance<BackupsDAL>()
-
-  init {
-    initDatabaseConnection()
-  }
-
-  object BackupStub {
-    fun get(): Backup =
-        Backup(
-            name = Random.next(),
-            displayName = Random.next(),
-            cronSchedule = Random.next(),
-            config = Random.next())
-  }
+  private val subject = harness.getInstance<BackupsDAL>()
 
   @Test
   fun canList() {
@@ -35,7 +21,7 @@ class BackupsDalTest {
 
     val res = subject.list()
 
-    assertThat(res).containsAtLeastElementsIn(created)
+    assertThat(res).containsExactlyElementsIn(created)
   }
 
   @Test

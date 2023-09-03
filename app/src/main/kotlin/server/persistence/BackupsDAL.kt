@@ -1,10 +1,12 @@
 package server.persistence
 
+import com.google.inject.Inject
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.Column
+import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.transaction
 import server.models.Backup
 import server.models.BackupName
@@ -30,9 +32,9 @@ class DAOBackup(id: EntityID<Int>) : IntEntity(id) {
 }
 
 /** A data access layer for persisting [Backup] core models */
-class BackupsDAL {
+class BackupsDAL @Inject constructor(private val db: Database) {
   fun create(backup: Backup): Backup =
-      transaction {
+      transaction(db) {
             DAOBackup.new {
               name = backup.name.value
               displayName = backup.displayName
@@ -42,14 +44,14 @@ class BackupsDAL {
           }
           .toCoreModel()
 
-  fun get(name: BackupName): Backup? = transaction { getByName(name) }?.toCoreModel()
+  fun get(name: BackupName): Backup? = transaction(db) { getByName(name) }?.toCoreModel()
 
-  fun list(): List<Backup> = transaction { DAOBackup.all().map { it.toCoreModel() } }
+  fun list(): List<Backup> = transaction(db) { DAOBackup.all().map { it.toCoreModel() } }
 
-  fun delete(name: BackupName) = transaction { getByName(name)?.delete() }
+  fun delete(name: BackupName) = transaction(db) { getByName(name)?.delete() }
 
   fun update(backup: Backup): Backup? =
-      transaction {
+      transaction(db) {
             getByName(backup.name)?.apply {
               displayName = backup.displayName
               cronSchedule = backup.cronSchedule

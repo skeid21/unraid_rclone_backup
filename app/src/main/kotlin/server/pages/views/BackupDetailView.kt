@@ -5,11 +5,9 @@ import kotlinx.html.a
 import kotlinx.html.i
 import kotlinx.html.p
 import kotlinx.html.style
-import server.injection.getInstance
 import server.models.BackupName
 import server.pages.BACKUP_EDIT
 import server.pages.withBackupId
-import server.services.BackupService
 
 fun ARTICLE.backupDetailView(backupName: BackupName) {
   p { +"this is the detail view" }

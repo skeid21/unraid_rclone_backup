@@ -69,6 +69,11 @@ dependencyResolutionManagement {
             bundle("shared", listOf("flogger", "flogger-backend", "flogger-slf4j-backend", "logback-core", "logback-classic", "guice"))
 
             //
+            // Quartz
+            //
+            library("quartz", "org.quartz-scheduler", "quartz").version("2.3.2")
+
+            //
             //persistence
             //
             version("exposed", "0.42.0")

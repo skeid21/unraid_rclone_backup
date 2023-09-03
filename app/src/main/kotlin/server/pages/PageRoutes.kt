@@ -10,7 +10,6 @@ import io.ktor.server.response.respondRedirect
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
-import server.injection.getInstance
 import server.injection.withInstance
 import server.models.Backup
 import server.models.BackupName
@@ -88,9 +87,7 @@ fun Routing.installIndexPageIngress() {
   // Delete
   //
   get(BACKUP_DELETE) {
-    withInstance<BackupService> {
-      delete(call.parameters["backup_id"]!!.idToName())
-    }
+    withInstance<BackupService> { delete(call.parameters["backup_id"]!!.idToName()) }
   }
 }
 
