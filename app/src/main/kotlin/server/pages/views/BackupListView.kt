@@ -1,5 +1,7 @@
 package server.pages.views
 
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.html.ARTICLE
 import kotlinx.html.UL
 import kotlinx.html.a
@@ -25,8 +27,14 @@ private fun UL.backupListItem(backup: Backup) {
         href = BACKUP_EDIT.withBackupId(backup.name)
         div(classes = "card-content") {
           div(classes = "card-title") { +backup.displayName }
-          p { +"Last run: Today" }
-          p { +"Created: Jun 12th, 2023" }
+
+          val lastRun = if (backup.lastSuccessfulRunTime != null) {
+            backup.lastSuccessfulRunTime.toLocalDateTime(TimeZone.currentSystemDefault())
+          } else {
+            "Never"
+          }
+          p { +"Last run: $lastRun " }
+          p { +"Created: ${backup.createTime.toLocalDateTime(TimeZone.currentSystemDefault())}" }
         }
       }
       div(classes = "card-action") {

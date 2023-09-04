@@ -11,6 +11,7 @@ object BackupStub {
       Backup(
           name = Random.next(),
           createTime = Clock.System.now(),
+          lastSuccessfulRunTime = null,
           displayName = Random.next(),
           cronSchedule = "0 * * * * ?",
           sourceDir = Files.createTempDirectory("com.unraid").toString(),

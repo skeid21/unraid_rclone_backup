@@ -20,6 +20,7 @@ import server.persistence.Backups.uniqueIndex
 object Backups : IntIdTable() {
   val name: Column<String> = varchar("name", 256).uniqueIndex()
   val createTime: Column<Instant> = timestamp("create_time")
+  val lastSuccessfulRunTime: Column<Instant?> = timestamp("last_successful_run_time").nullable()
   val displayName: Column<String> = varchar("display_name", 256)
   val cronSchedule: Column<String> = varchar("cron_schedule", 256)
   val sourceDir: Column<String> = varchar("source_dir", 4096)
@@ -33,6 +34,7 @@ class DAOBackup(id: EntityID<Int>) : IntEntity(id) {
 
   var name by Backups.name.uniqueIndex()
   var createTime by Backups.createTime
+  var lastSuccessfulRunTime by Backups.lastSuccessfulRunTime
   var displayName by Backups.displayName
   var cronSchedule by Backups.cronSchedule
   var sourceDir by Backups.sourceDir
@@ -67,6 +69,7 @@ class BackupsDAL @Inject constructor(private val db: Database) {
 
 /** Update the [DAOBackup] with fields from the specified [Backup] */
 private fun DAOBackup.update(backup: Backup) {
+  lastSuccessfulRunTime = backup.lastSuccessfulRunTime
   displayName = backup.displayName
   cronSchedule = backup.cronSchedule
   sourceDir = backup.sourceDir
@@ -79,6 +82,7 @@ private fun DAOBackup.toCoreModel(): Backup =
     Backup(
         name = name.asBackupName(),
         createTime = createTime,
+        lastSuccessfulRunTime = lastSuccessfulRunTime,
         displayName = displayName,
         cronSchedule = cronSchedule,
         sourceDir = sourceDir,

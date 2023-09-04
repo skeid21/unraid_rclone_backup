@@ -22,6 +22,8 @@ data class Backup(
     val name: BackupName,
     /** The creation time for this backup */
     val createTime: Instant,
+    /** The last successful time that this backup ran*/
+    val lastSuccessfulRunTime: Instant?,
     /** The display name for the backup */
     val displayName: String,
     /** A cron schedule string used to schedule the backup */

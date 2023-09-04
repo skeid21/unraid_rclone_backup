@@ -101,6 +101,8 @@ fun Parameters.toBackup(backupName: BackupName?): Backup {
       name = name,
       // create time is ignored on update and create
       createTime = Clock.System.now(),
+      // lastSuccessfulRunTime is ignored on update and create
+      lastSuccessfulRunTime = null,
       displayName = displayName,
       cronSchedule = this["cronSchedule"].toString(),
       sourceDir = this["sourceDir"].toString(),
