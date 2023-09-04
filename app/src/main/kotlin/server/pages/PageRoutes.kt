@@ -100,6 +100,8 @@ fun Parameters.toBackup(backupName: BackupName?): Backup {
       name = name,
       displayName = displayName,
       cronSchedule = this["cronSchedule"].toString(),
+      sourceDir =  this["sourceDir"].toString(),
+      destinationDir = this["destinationDir"].toString(),
       config = this["config"].toString())
 }
 

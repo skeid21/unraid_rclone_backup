@@ -22,6 +22,10 @@ data class Backup(
     val displayName: String,
     /** A cron schedule string used to schedule the backup */
     val cronSchedule: String,
+    /** The source directory that the backup should read from */
+    val sourceDir: String,
+    /** The destination directory that the backup should write to*/
+    val destinationDir: String,
     /** The rclone configuration to use* */
     val config: String
 )
