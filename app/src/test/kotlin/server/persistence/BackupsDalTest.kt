@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import server.TestHarness
 import server.TestHarnessExtension
 import server.models.BackupStub
+import server.models.toCompare
 
 @ExtendWith(TestHarnessExtension::class)
 class BackupsDalTest(harness: TestHarness) {
@@ -28,9 +29,9 @@ class BackupsDalTest(harness: TestHarness) {
     val expected = BackupStub.get()
 
     val createRes = subject.create(expected)
-    assertThat(createRes).isEqualTo(expected)
+    assertThat(createRes.toCompare()).isEqualTo(expected.toCompare())
 
-    subject.get(createRes.name).let { assertThat(it).isEqualTo(expected) }
+    subject.get(createRes.name).let { assertThat(it?.toCompare()).isEqualTo(expected.toCompare()) }
 
     subject.delete(createRes.name)
     subject.get(createRes.name).let { assertThat(it).isNull() }
@@ -41,7 +42,7 @@ class BackupsDalTest(harness: TestHarness) {
     val expected = BackupStub.get()
 
     val createRes = subject.create(expected)
-    assertThat(createRes).isEqualTo(expected)
+    assertThat(createRes.toCompare()).isEqualTo(expected.toCompare())
 
     assertFailsWith<ExposedSQLException> {
       subject.create(expected)
@@ -54,11 +55,13 @@ class BackupsDalTest(harness: TestHarness) {
   fun canUpdate() {
     val expected = BackupStub.get()
 
-    subject.create(expected).let { assertThat(it).isEqualTo(expected) }
+    subject.create(expected).let { assertThat(it.toCompare()).isEqualTo(expected.toCompare()) }
 
-    subject.get(expected.name).let { assertThat(it).isEqualTo(expected) }
+    subject.get(expected.name).let { assertThat(it?.toCompare()).isEqualTo(expected.toCompare()) }
 
     val expectedUpdate = BackupStub.get().copy(name = expected.name)
-    subject.update(expectedUpdate).let { assertThat(it).isEqualTo(expectedUpdate) }
+    subject.update(expectedUpdate).let {
+      assertThat(it?.toCompare()).isEqualTo(expectedUpdate.toCompare())
+    }
   }
 }

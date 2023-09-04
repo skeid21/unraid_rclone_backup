@@ -28,7 +28,7 @@ kotlin {
 application {
     // Define the main class for the application.
     mainClass.set("server.AppMainKt")
-    //enable development mode for enhanced error page reponses and hot reloading
+    //enable development mode for enhanced error page responses and hot reloading
     applicationDefaultJvmArgs = listOf(
         "-Dio.ktor.development=true",
         "-Dapplication.sqlite.data_path=/tmp/com.unclone/sqlite/data.db"

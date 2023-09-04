@@ -10,6 +10,7 @@ import io.ktor.server.response.respondRedirect
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import kotlinx.datetime.Clock
 import server.injection.withInstance
 import server.models.Backup
 import server.models.BackupName
@@ -98,9 +99,11 @@ fun Parameters.toBackup(backupName: BackupName?): Backup {
 
   return Backup(
       name = name,
+      // create time is ignored on update and create
+      createTime = Clock.System.now(),
       displayName = displayName,
       cronSchedule = this["cronSchedule"].toString(),
-      sourceDir =  this["sourceDir"].toString(),
+      sourceDir = this["sourceDir"].toString(),
       destinationDir = this["destinationDir"].toString(),
       config = this["config"].toString())
 }

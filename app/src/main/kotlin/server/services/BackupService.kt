@@ -3,7 +3,6 @@ package server.services
 import com.google.inject.Inject
 import io.ktor.server.plugins.BadRequestException
 import java.nio.file.Paths
-import kotlin.io.path.Path
 import kotlin.io.path.exists
 import org.quartz.CronExpression
 import server.models.Backup
@@ -43,7 +42,7 @@ constructor(
       errorBuilder.appendLine(INVALID_CRON_SCHEDULE_MESSAGE)
     }
 
-    if(sourceDir.isBlank()) {
+    if (sourceDir.isBlank()) {
       errorBuilder.appendLine(SOURCE_DIR_CANNOT_BE_EMPTY)
     }
 
@@ -67,6 +66,6 @@ constructor(
     const val INVALID_CRON_SCHEDULE_MESSAGE = "cronSchedule is not a valid cron specification"
     const val SOURCE_DIR_CANNOT_BE_EMPTY = "sourceDir cannot be empty"
     const val SOURCE_DIR_DOES_NOT_EXIST = "sourceDir does not exist"
-    const val DESTINATION_DIR_CANNOT_BE_EMPTY= "destinationDir cannot be empty"
+    const val DESTINATION_DIR_CANNOT_BE_EMPTY = "destinationDir cannot be empty"
   }
 }

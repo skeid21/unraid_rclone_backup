@@ -5,7 +5,7 @@ import java.util.Properties
 val config =
     Properties().apply {
       load(ClassLoader.getSystemClassLoader().getResourceAsStream("config.properties"))
-      // allow comamnd line jvm args to override
+      // allow command line jvm args to override
       keys.forEach { key ->
         System.getProperty(key as String)?.let { value -> setProperty(key, value) }
       }

@@ -3,7 +3,6 @@ package server.pages.views
 import kotlinx.html.ARTICLE
 import kotlinx.html.UL
 import kotlinx.html.a
-import kotlinx.html.classes
 import kotlinx.html.div
 import kotlinx.html.i
 import kotlinx.html.li

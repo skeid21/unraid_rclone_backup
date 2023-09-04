@@ -5,7 +5,6 @@ import kotlinx.html.HTML
 import kotlinx.html.a
 import kotlinx.html.article
 import kotlinx.html.body
-import kotlinx.html.classes
 import kotlinx.html.div
 import kotlinx.html.head
 import kotlinx.html.id
