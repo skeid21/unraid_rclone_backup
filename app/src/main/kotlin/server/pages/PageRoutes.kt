@@ -26,6 +26,7 @@ import server.services.BackupService
 const val BACKUPS = "/backups"
 const val SETTINGS = "/settings"
 const val BACKUP_DETAIL = "$BACKUPS/{backup_id}"
+const val BACKUP_DRYRUN = "$BACKUPS/{backup_id}/dryrun"
 const val BACKUP_EDIT = "$BACKUPS/{backup_id}/edit"
 const val BACKUP_DELETE = "$BACKUPS/{backup_id}/delete"
 const val BACKUP_NEW = "$BACKUPS//new"
@@ -49,6 +50,7 @@ fun Routing.installIndexPageIngress() {
   // List
   //
   get(BACKUPS) { this.call.respondHtml { root { backupListView() } } }
+
   get(BACKUP_DETAIL) {
     call.respondHtml { root { backupDetailView(call.parameters["backup_id"]!!.idToName()) } }
   }

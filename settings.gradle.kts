@@ -36,6 +36,7 @@ dependencyResolutionManagement {
             library("ktor-server-html-builder", "io.ktor", "ktor-server-html-builder").versionRef("ktor")
             library("ktor-server-call-logging", "io.ktor", "ktor-server-call-logging").versionRef("ktor")
             library("ktor-serialization-gson", "io.ktor", "ktor-serialization-gson").versionRef("ktor")
+            library("ktor-server-status-pages", "io.ktor", "ktor-server-status-pages").versionRef("ktor")
 
             bundle("ktor", listOf(
               "ktor-server-core",
@@ -45,7 +46,8 @@ dependencyResolutionManagement {
               "ktor-server-auto-head-response",
               "ktor-server-html-builder",
               "ktor-server-call-logging",
-              "ktor-serialization-gson"))
+              "ktor-serialization-gson",
+                "ktor-server-status-pages"))
 
             //
             //Kotlinx

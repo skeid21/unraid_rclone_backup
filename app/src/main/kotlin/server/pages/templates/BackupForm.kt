@@ -61,7 +61,7 @@ fun ARTICLE.backupForm(backup: Backup?, formActionUrl: String) {
           input(type = InputType.text) {
             id = "sourceDir"
             name = id
-            value = backup?.cronSchedule ?: ""
+            value = backup?.destinationDir ?: ""
           }
           label {
             htmlFor = "sourceDir"
@@ -73,7 +73,7 @@ fun ARTICLE.backupForm(backup: Backup?, formActionUrl: String) {
           input(type = InputType.text) {
             id = "destinationDir"
             name = id
-            value = backup?.cronSchedule ?: ""
+            value = backup?.destinationDir ?: ""
           }
           label {
             htmlFor = "destinationDir"

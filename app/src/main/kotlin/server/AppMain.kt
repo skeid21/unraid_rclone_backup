@@ -5,14 +5,19 @@ package server
 
 import com.google.common.flogger.FluentLogger
 import io.ktor.serialization.gson.gson
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.install
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.html.respondHtml
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.autohead.AutoHeadResponse
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.defaultheaders.DefaultHeaders
+import io.ktor.server.plugins.statuspages.StatusPages
+import server.pages.templates.root
+import server.pages.views.errorView
 import server.persistence.initDatabaseConnection
 
 private val logger = FluentLogger.forEnclosingClass()
@@ -35,6 +40,11 @@ fun startServer() {
           }
           install(AutoHeadResponse)
           install(CallLogging)
+          install(StatusPages) {
+            exception<Throwable> { call, cause  ->
+              call.respondHtml { root { errorView(cause) } }
+            }
+          }
 
           installRoutes()
         }
