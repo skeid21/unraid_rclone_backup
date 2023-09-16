@@ -66,6 +66,14 @@ class BackupServiceTest(harness: TestHarness) {
                 BackupStub.get().copy(cronSchedule = "Jkk21"),
                 BackupService.INVALID_CRON_SCHEDULE_MESSAGE),
             Arguments.of(
+            // Invalid cron - not enough specificaitons 5 required
+            BackupStub.get().copy(cronSchedule = "0 * * *"),
+            BackupService.INVALID_CRON_SCHEDULE_MESSAGE),
+          Arguments.of(
+            // Invalid cron - too many specifications
+            BackupStub.get().copy(cronSchedule = "0 * * * * ?"),
+            BackupService.INVALID_CRON_SCHEDULE_MESSAGE),
+            Arguments.of(
                 // empty sourceDir
                 BackupStub.get().copy(sourceDir = ""),
                 BackupService.SOURCE_DIR_CANNOT_BE_EMPTY),

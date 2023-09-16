@@ -37,8 +37,24 @@ constructor(
 
   /** Will throw a [BadRequestException] if the backup is not valid */
   private fun Backup.isValidOrThrow(): Backup {
+    fun isValidCron(cronSchedule: String): Boolean {
+      val parts = cronSchedule.split(" ")
+      //Only support 5 parts cron schedule
+      if (parts.count() != 5) {
+        return false
+      }
+
+      //Quartz cron requires sixth part (day of month)
+      if (!CronExpression.isValidExpression("$cronSchedule ?")) {
+        return false
+      }
+
+      return true
+    }
+
     val errorBuilder = StringBuilder()
-    if (!CronExpression.isValidExpression(cronSchedule)) {
+
+    if (!isValidCron(cronSchedule)) {
       errorBuilder.appendLine(INVALID_CRON_SCHEDULE_MESSAGE)
     }
 
