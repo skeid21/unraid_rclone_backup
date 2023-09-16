@@ -51,6 +51,7 @@ fun ARTICLE.backupForm(backup: Backup?, formActionUrl: String) {
             id = "cronSchedule"
             name = id
             value = backup?.cronSchedule ?: ""
+            placeholder ="0 2 * * *"
           }
           label {
             htmlFor = "cronSchedule"
