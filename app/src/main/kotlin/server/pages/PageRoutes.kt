@@ -31,7 +31,7 @@ const val BACKUP_EDIT = "$BACKUPS/{backup_id}/edit"
 const val BACKUP_DELETE = "$BACKUPS/{backup_id}/delete"
 const val BACKUP_NEW = "$BACKUPS//new"
 
-fun String.withBackupId(backupName: BackupName): String = replace("{backup_id}", backupName.id())
+fun String.withBackupId(backupName: BackupName): String = replace("{backup_id}", backupName.id)
 
 fun Routing.installIndexPageIngress() {
   // index

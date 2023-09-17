@@ -30,7 +30,7 @@ class BackupResultsDalTest(private val harness: TestHarness) {
 
   @Test
   fun canPersist() {
-    val expected = BackupResultStub.get()
+    val expected = BackupResultStub.get(backupName)
     subject.create(expected, backupId).let { assertThat(it.entity).isEqualTo(expected) }
 
     subject.get(expected.name).let { assertThat(it?.entity).isEqualTo(expected) }
@@ -42,7 +42,7 @@ class BackupResultsDalTest(private val harness: TestHarness) {
   @Test
   fun canList() {
     val expected =
-        generateSequence { subject.create(BackupResultStub.get(), backupId) }
+        generateSequence { subject.create(BackupResultStub.get(backupName), backupId) }
             .take(5)
             .map { it.entity }
             .toList()
@@ -54,14 +54,14 @@ class BackupResultsDalTest(private val harness: TestHarness) {
   fun create_invalidBackupForeignKey_throws() {
     assertFailsWith<ExposedSQLException> {
       val invalid: Int = Random.next()
-      subject.create(BackupResultStub.get(), invalid)
+      subject.create(BackupResultStub.get(backupName), invalid)
     }
   }
 
   @Test
   fun deletingBackup_cascadesDelete() {
     val expected =
-        generateSequence { subject.create(BackupResultStub.get(), backupId) }
+        generateSequence { subject.create(BackupResultStub.get(backupName), backupId) }
             .take(5)
             .map { it.entity }
             .toList()

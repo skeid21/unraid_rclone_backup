@@ -2,14 +2,17 @@ package server.models
 
 import kotlinx.datetime.Instant
 
-@JvmInline
-value class BackupResultName(val value: String) {
+data class BackupResultName(val value: String) {
+  val parent: BackupName
+  val id: String
   init {
-    require(value.isNotBlank())
+    val matchResult = nameRegex.matchEntire(value) ?: throw IllegalStateException("$value is not a valid BackupResultName")
+    parent = BackupName("backups/${matchResult.groupValues[1]}")
+    id = matchResult.groupValues[2]
   }
 
-  fun id(): String {
-    return value.substringAfter("/")
+  companion object {
+    private val nameRegex = Regex("backups/([^/]+)/backupResults/([^/]+)$")
   }
 }
 

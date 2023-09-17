@@ -10,7 +10,7 @@ import server.persistence.BackupRef
 object BackupStub {
   fun get(): Backup =
       Backup(
-          name = Random.next(),
+          name = "backups/${Random.next<String>()}".asBackupName(),
           createTime = instantForTest(),
           lastSuccessfulRunTime = null,
           displayName = Random.next(),

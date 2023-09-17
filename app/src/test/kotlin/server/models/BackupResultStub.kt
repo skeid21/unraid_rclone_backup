@@ -5,9 +5,9 @@ import server.instantForTest
 import server.next
 
 object BackupResultStub {
-  fun get() =
+  fun get(backupName: BackupName) =
       BackupResult(
-          name = "backups/${Random.next<String>()}".asBackupResultName(),
+          name = "${backupName.value}/backupResults/${Random.next<String>()}".asBackupResultName(),
           startTime = instantForTest(),
           endTime = instantForTest(),
           result = BackupResult.Result.Success,
