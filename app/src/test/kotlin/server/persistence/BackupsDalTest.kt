@@ -58,8 +58,6 @@ class BackupsDalTest(harness: TestHarness) {
     val createRes = subject.create(expected)
     assertThat(createRes.toCompare()).isEqualTo(expected.toCompare())
 
-    assertFailsWith<ExposedSQLException> {
-      subject.create(expected)
-    }
+    assertFailsWith<ExposedSQLException> { subject.create(expected) }
   }
 }
