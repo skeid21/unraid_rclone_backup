@@ -28,7 +28,7 @@ object BackupResults : IntIdTable() {
 
   init {
     foreignKey(
-      parentName to Backups.name,
+        parentName to Backups.name,
         onUpdate = ReferenceOption.RESTRICT,
         onDelete = ReferenceOption.CASCADE)
   }
@@ -66,7 +66,7 @@ class BackupResultsDal @Inject constructor(private val db: Database) {
 
   fun list(parentName: BackupName): List<BackupResultRef> =
       transaction(db) {
-        DAOBackupResult.find { BackupResults.parentName eq parentName.value}.map { it.toRef() }
+        DAOBackupResult.find { BackupResults.parentName eq parentName.value }.map { it.toRef() }
       }
 
   fun delete(name: BackupResultName) = transaction(db) { getByName(name)?.delete() }

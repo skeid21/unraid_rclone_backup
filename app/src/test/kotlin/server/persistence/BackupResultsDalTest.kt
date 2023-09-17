@@ -1,7 +1,6 @@
 package server.persistence
 
 import com.google.common.truth.Truth.assertThat
-import kotlin.random.Random
 import kotlin.test.assertFailsWith
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.junit.jupiter.api.Test

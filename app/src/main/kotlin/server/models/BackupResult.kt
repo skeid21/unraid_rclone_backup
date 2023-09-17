@@ -5,8 +5,11 @@ import kotlinx.datetime.Instant
 data class BackupResultName(val value: String) {
   val parent: BackupName
   val id: String
+
   init {
-    val matchResult = nameRegex.matchEntire(value) ?: throw IllegalStateException("$value is not a valid BackupResultName")
+    val matchResult =
+        nameRegex.matchEntire(value)
+            ?: throw IllegalStateException("$value is not a valid BackupResultName")
     parent = BackupName("backups/${matchResult.groupValues[1]}")
     id = matchResult.groupValues[2]
   }
