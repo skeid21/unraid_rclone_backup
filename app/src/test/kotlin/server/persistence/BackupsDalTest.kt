@@ -22,12 +22,10 @@ class BackupsDalTest(harness: TestHarness) {
     val createRes = subject.create(expected)
     assertThat(createRes.toCompare()).isEqualTo(expected.toCompare())
 
-    subject.get(createRes.entity.name).let {
-      assertThat(it?.toCompare()).isEqualTo(expected.toCompare())
-    }
+    subject.get(createRes.name).let { assertThat(it?.toCompare()).isEqualTo(expected.toCompare()) }
 
-    subject.delete(createRes.entity.name)
-    subject.get(createRes.entity.name).let { assertThat(it).isNull() }
+    subject.delete(createRes.name)
+    subject.get(createRes.name).let { assertThat(it).isNull() }
   }
 
   @Test
@@ -46,12 +44,11 @@ class BackupsDalTest(harness: TestHarness) {
 
   @Test
   fun canList() {
-    val created =
-        generateSequence { subject.create(BackupStub.get()) }.take(5).map { it.entity }.toList()
+    val created = generateSequence { subject.create(BackupStub.get()) }.take(5).toList()
 
     val res = subject.list()
 
-    assertThat(res.map { it.entity }.toCompare()).containsExactlyElementsIn(created.toCompare())
+    assertThat(res.toCompare()).containsExactlyElementsIn(created.toCompare())
   }
 
   @Test

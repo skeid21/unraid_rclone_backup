@@ -41,11 +41,9 @@ class DAOBackup(id: EntityID<Int>) : IntEntity(id) {
   var config by Backups.config
 }
 
-typealias BackupRef = EntityRef<Backup>
-
 /** A data access layer for persisting [Backup] core models */
 class BackupsDal @Inject constructor(private val db: Database) {
-  fun create(backup: Backup): BackupRef =
+  fun create(backup: Backup): Backup =
       transaction(db) {
             DAOBackup.new {
               name = backup.name.value
@@ -53,14 +51,14 @@ class BackupsDal @Inject constructor(private val db: Database) {
               update(backup)
             }
           }
-          .toRef()
+          .toBackup()
 
-  fun get(name: BackupName): BackupRef? = transaction(db) { getByName(name) }?.toRef()
+  fun get(name: BackupName): Backup? = transaction(db) { getByName(name) }?.toBackup()
 
-  fun list(): List<BackupRef> = transaction(db) { DAOBackup.all().map { it.toRef() } }
+  fun list(): List<Backup> = transaction(db) { DAOBackup.all().map { it.toBackup() } }
 
-  fun update(backup: Backup): BackupRef? =
-      transaction(db) { getByName(backup.name)?.apply { update(backup) } }?.toRef()
+  fun update(backup: Backup): Backup? =
+      transaction(db) { getByName(backup.name)?.apply { update(backup) } }?.toBackup()
 
   fun delete(name: BackupName) = transaction(db) { getByName(name)?.delete() }
 
@@ -79,15 +77,13 @@ private fun DAOBackup.update(backup: Backup) {
 }
 
 /** Converts a [DAOBackup] to a [Backup]* */
-private fun DAOBackup.toRef(): BackupRef =
-    BackupRef(
-        Backup(
-            name = name.asBackupName(),
-            createTime = createTime,
-            lastSuccessfulRunTime = lastSuccessfulRunTime,
-            displayName = displayName,
-            cronSchedule = cronSchedule,
-            sourceDir = sourceDir,
-            destinationDir = destinationDir,
-            config = config),
-        id.value)
+private fun DAOBackup.toBackup(): Backup =
+    Backup(
+        name = name.asBackupName(),
+        createTime = createTime,
+        lastSuccessfulRunTime = lastSuccessfulRunTime,
+        displayName = displayName,
+        cronSchedule = cronSchedule,
+        sourceDir = sourceDir,
+        destinationDir = destinationDir,
+        config = config)

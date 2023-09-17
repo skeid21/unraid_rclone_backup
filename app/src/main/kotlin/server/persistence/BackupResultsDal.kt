@@ -46,8 +46,6 @@ class DAOBackupResult(id: EntityID<Int>) : IntEntity(id) {
   var output by BackupResults.output
 }
 
-typealias BackupResultRef = EntityRef<BackupResult>
-
 class BackupResultsDal @Inject constructor(private val db: Database) {
   fun create(backupResult: BackupResult) =
       transaction(db) {
@@ -60,13 +58,15 @@ class BackupResultsDal @Inject constructor(private val db: Database) {
               output = backupResult.output
             }
           }
-          .toRef()
+          .toBackupResult()
 
-  fun get(name: BackupResultName): BackupResultRef? = transaction(db) { getByName(name) }?.toRef()
+  fun get(name: BackupResultName): BackupResult? =
+      transaction(db) { getByName(name) }?.toBackupResult()
 
-  fun list(parentName: BackupName): List<BackupResultRef> =
+  fun list(parentName: BackupName): List<BackupResult> =
       transaction(db) {
-        DAOBackupResult.find { BackupResults.parentName eq parentName.value }.map { it.toRef() }
+        DAOBackupResult.find { BackupResults.parentName eq parentName.value }
+            .map { it.toBackupResult() }
       }
 
   fun delete(name: BackupResultName) = transaction(db) { getByName(name)?.delete() }
@@ -75,12 +75,10 @@ class BackupResultsDal @Inject constructor(private val db: Database) {
       DAOBackupResult.find { BackupResults.name eq name.value }.firstOrNull()
 }
 
-fun DAOBackupResult.toRef() =
-    BackupResultRef(
-        BackupResult(
-            name = name.asBackupResultName(),
-            startTime = startTime,
-            endTime = endTime,
-            result = BackupResult.Result.valueOf(result),
-            output = output),
-        primaryId = id.value)
+fun DAOBackupResult.toBackupResult() =
+    BackupResult(
+        name = name.asBackupResultName(),
+        startTime = startTime,
+        endTime = endTime,
+        result = BackupResult.Result.valueOf(result),
+        output = output)

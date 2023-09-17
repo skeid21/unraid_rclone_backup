@@ -22,15 +22,15 @@ class BackupResultsDalTest(private val harness: TestHarness) {
   init {
     val backupsDal = harness.getInstance<BackupsDal>()
     val backup = backupsDal.create(BackupStub.get())
-    backupName = backup.entity.name
+    backupName = backup.name
   }
 
   @Test
   fun canPersist() {
     val expected = BackupResultStub.get(backupName)
-    subject.create(expected).let { assertThat(it.entity).isEqualTo(expected) }
+    subject.create(expected).let { assertThat(it).isEqualTo(expected) }
 
-    subject.get(expected.name).let { assertThat(it?.entity).isEqualTo(expected) }
+    subject.get(expected.name).let { assertThat(it).isEqualTo(expected) }
 
     subject.delete(expected.name)
     subject.get(expected.name).let { assertThat(it).isNull() }
@@ -39,12 +39,9 @@ class BackupResultsDalTest(private val harness: TestHarness) {
   @Test
   fun canList() {
     val expected =
-        generateSequence { subject.create(BackupResultStub.get(backupName)) }
-            .take(5)
-            .map { it.entity }
-            .toList()
+        generateSequence { subject.create(BackupResultStub.get(backupName)) }.take(5).toList()
 
-    subject.list(backupName).let { res -> assertThat(res.map { it.entity }).isEqualTo(expected) }
+    subject.list(backupName).let { res -> assertThat(res).isEqualTo(expected) }
   }
 
   @Test
@@ -58,12 +55,9 @@ class BackupResultsDalTest(private val harness: TestHarness) {
   @Test
   fun deletingBackup_cascadesDelete() {
     val expected =
-        generateSequence { subject.create(BackupResultStub.get(backupName)) }
-            .take(5)
-            .map { it.entity }
-            .toList()
+        generateSequence { subject.create(BackupResultStub.get(backupName)) }.take(5).toList()
 
-    subject.list(backupName).let { res -> assertThat(res.map { it.entity }).isEqualTo(expected) }
+    subject.list(backupName).let { res -> assertThat(res).isEqualTo(expected) }
 
     harness.getInstance<BackupsDal>().delete(backupName)
 

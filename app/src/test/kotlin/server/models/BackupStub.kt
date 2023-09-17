@@ -5,7 +5,6 @@ import kotlin.random.Random
 import kotlinx.datetime.Instant
 import server.instantForTest
 import server.next
-import server.persistence.BackupRef
 
 object BackupStub {
   fun get(): Backup =
@@ -23,5 +22,3 @@ object BackupStub {
 fun Backup.toCompare(): Backup = this.copy(createTime = Instant.fromEpochMilliseconds(0))
 
 fun List<Backup>.toCompare(): List<Backup> = this.map { it.toCompare() }
-
-fun BackupRef.toCompare(): Backup = this.entity.toCompare()

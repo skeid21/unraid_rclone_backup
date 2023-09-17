@@ -21,8 +21,6 @@ data class BackupResultName(val value: String) {
 
 fun String.asBackupResultName() = BackupResultName(this)
 
-fun String.idToBackupResultName() = BackupResultName("backupResults/$this")
-
 /** The result of running a backup */
 data class BackupResult(
     /** The unique resource name for the BackupResult */

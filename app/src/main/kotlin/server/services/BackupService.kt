@@ -8,7 +8,6 @@ import org.quartz.CronExpression
 import server.models.Backup
 import server.models.BackupName
 import server.persistence.BackupsDal
-import server.persistence.toEntityList
 
 class BackupService
 @Inject
@@ -17,19 +16,19 @@ constructor(
 ) {
 
   fun create(backup: Backup): Backup {
-    return backupsDal.create(backup.isValidOrThrow()).entity
+    return backupsDal.create(backup.isValidOrThrow())
   }
 
   fun get(backupName: BackupName): Backup? {
-    return backupsDal.get(backupName)?.entity
+    return backupsDal.get(backupName)
   }
 
   fun list(): List<Backup> {
-    return backupsDal.list().toEntityList()
+    return backupsDal.list()
   }
 
   fun update(backup: Backup): Backup? {
-    return backupsDal.update(backup.isValidOrThrow())?.entity
+    return backupsDal.update(backup.isValidOrThrow())
   }
 
   fun delete(backupName: BackupName) {
