@@ -60,8 +60,6 @@ class BackupsDalTest(harness: TestHarness) {
 
     assertFailsWith<ExposedSQLException> {
       subject.create(expected)
-      // get to trigger transaction caching flush
-      subject.get(expected.name)
     }
   }
 }
