@@ -17,7 +17,7 @@ import server.models.asBackupName
 
 /** Data definition for the Backups table* */
 object Backups : IntIdTable() {
-  val name: Column<String> = varchar("name", 256).uniqueIndex()
+  val name: Column<String> = varchar("name", 2083).uniqueIndex()
   val createTime: Column<Instant> = timestamp("create_time")
   val lastSuccessfulRunTime: Column<Instant?> = timestamp("last_successful_run_time").nullable()
   val displayName: Column<String> = varchar("display_name", 256)
