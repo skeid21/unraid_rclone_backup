@@ -28,11 +28,12 @@ private fun UL.backupListItem(backup: Backup) {
         div(classes = "card-content") {
           div(classes = "card-title") { +backup.displayName }
 
-          val lastRun = if (backup.lastSuccessfulRunTime != null) {
-            backup.lastSuccessfulRunTime.toLocalDateTime(TimeZone.currentSystemDefault())
-          } else {
-            "Never"
-          }
+          val lastRun =
+              if (backup.lastSuccessfulRunTime != null) {
+                backup.lastSuccessfulRunTime.toLocalDateTime(TimeZone.currentSystemDefault())
+              } else {
+                "Never"
+              }
           p { +"Last run: $lastRun " }
           p { +"Created: ${backup.createTime.toLocalDateTime(TimeZone.currentSystemDefault())}" }
         }

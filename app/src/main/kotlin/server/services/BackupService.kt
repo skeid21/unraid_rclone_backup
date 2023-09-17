@@ -7,44 +7,45 @@ import kotlin.io.path.exists
 import org.quartz.CronExpression
 import server.models.Backup
 import server.models.BackupName
-import server.persistence.BackupsDAL
+import server.persistence.BackupsDal
+import server.persistence.toEntityList
 
 class BackupService
 @Inject
 constructor(
-    private val backupsDAL: BackupsDAL,
+    private val backupsDal: BackupsDal,
 ) {
 
   fun create(backup: Backup): Backup {
-    return backupsDAL.create(backup.isValidOrThrow())
+    return backupsDal.create(backup.isValidOrThrow()).entity
   }
 
   fun get(backupName: BackupName): Backup? {
-    return backupsDAL.get(backupName)
+    return backupsDal.get(backupName)?.entity
   }
 
   fun list(): List<Backup> {
-    return backupsDAL.list()
+    return backupsDal.list().toEntityList()
   }
 
   fun update(backup: Backup): Backup? {
-    return backupsDAL.update(backup.isValidOrThrow())
+    return backupsDal.update(backup.isValidOrThrow())?.entity
   }
 
   fun delete(backupName: BackupName) {
-    backupsDAL.delete(backupName)
+    backupsDal.delete(backupName)
   }
 
   /** Will throw a [BadRequestException] if the backup is not valid */
   private fun Backup.isValidOrThrow(): Backup {
     fun isValidCron(cronSchedule: String): Boolean {
       val parts = cronSchedule.split(" ")
-      //Only support 5 parts cron schedule
+      // Only support 5 parts cron schedule
       if (parts.count() != 5) {
         return false
       }
 
-      //Quartz cron requires sixth part (day of month)
+      // Quartz cron requires sixth part (day of month)
       if (!CronExpression.isValidExpression("$cronSchedule ?")) {
         return false
       }

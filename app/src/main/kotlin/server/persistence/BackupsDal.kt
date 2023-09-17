@@ -14,7 +14,6 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import server.models.Backup
 import server.models.BackupName
 import server.models.asBackupName
-import server.persistence.Backups.uniqueIndex
 
 /** Data definition for the Backups table* */
 object Backups : IntIdTable() {
@@ -32,7 +31,7 @@ object Backups : IntIdTable() {
 class DAOBackup(id: EntityID<Int>) : IntEntity(id) {
   companion object : IntEntityClass<DAOBackup>(Backups)
 
-  var name by Backups.name.uniqueIndex()
+  var name by Backups.name
   var createTime by Backups.createTime
   var lastSuccessfulRunTime by Backups.lastSuccessfulRunTime
   var displayName by Backups.displayName
@@ -42,9 +41,11 @@ class DAOBackup(id: EntityID<Int>) : IntEntity(id) {
   var config by Backups.config
 }
 
+typealias BackupRef = EntityRef<Backup>
+
 /** A data access layer for persisting [Backup] core models */
-class BackupsDAL @Inject constructor(private val db: Database) {
-  fun create(backup: Backup): Backup =
+class BackupsDal @Inject constructor(private val db: Database) {
+  fun create(backup: Backup): BackupRef =
       transaction(db) {
             DAOBackup.new {
               name = backup.name.value
@@ -52,16 +53,16 @@ class BackupsDAL @Inject constructor(private val db: Database) {
               update(backup)
             }
           }
-          .toCoreModel()
+          .toRef()
 
-  fun get(name: BackupName): Backup? = transaction(db) { getByName(name) }?.toCoreModel()
+  fun get(name: BackupName): BackupRef? = transaction(db) { getByName(name) }?.toRef()
 
-  fun list(): List<Backup> = transaction(db) { DAOBackup.all().map { it.toCoreModel() } }
+  fun list(): List<BackupRef> = transaction(db) { DAOBackup.all().map { it.toRef() } }
+
+  fun update(backup: Backup): BackupRef? =
+      transaction(db) { getByName(backup.name)?.apply { update(backup) } }?.toRef()
 
   fun delete(name: BackupName) = transaction(db) { getByName(name)?.delete() }
-
-  fun update(backup: Backup): Backup? =
-      transaction(db) { getByName(backup.name)?.apply { update(backup) } }?.toCoreModel()
 
   private fun getByName(name: BackupName): DAOBackup? =
       DAOBackup.find { Backups.name eq name.value }.firstOrNull()
@@ -78,13 +79,15 @@ private fun DAOBackup.update(backup: Backup) {
 }
 
 /** Converts a [DAOBackup] to a [Backup]* */
-private fun DAOBackup.toCoreModel(): Backup =
-    Backup(
-        name = name.asBackupName(),
-        createTime = createTime,
-        lastSuccessfulRunTime = lastSuccessfulRunTime,
-        displayName = displayName,
-        cronSchedule = cronSchedule,
-        sourceDir = sourceDir,
-        destinationDir = destinationDir,
-        config = config)
+private fun DAOBackup.toRef(): BackupRef =
+    BackupRef(
+        Backup(
+            name = name.asBackupName(),
+            createTime = createTime,
+            lastSuccessfulRunTime = lastSuccessfulRunTime,
+            displayName = displayName,
+            cronSchedule = cronSchedule,
+            sourceDir = sourceDir,
+            destinationDir = destinationDir,
+            config = config),
+        id.value)

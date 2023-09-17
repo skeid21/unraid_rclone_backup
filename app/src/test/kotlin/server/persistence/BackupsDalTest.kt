@@ -13,16 +13,7 @@ import server.models.toCompare
 @ExtendWith(TestHarnessExtension::class)
 class BackupsDalTest(harness: TestHarness) {
 
-  private val subject = harness.getInstance<BackupsDAL>()
-
-  @Test
-  fun canList() {
-    val created = generateSequence { subject.create(BackupStub.get()) }.take(5).toList()
-
-    val res = subject.list()
-
-    assertThat(res).containsExactlyElementsIn(created)
-  }
+  private val subject = harness.getInstance<BackupsDal>()
 
   @Test
   fun canPersist() {
@@ -31,24 +22,12 @@ class BackupsDalTest(harness: TestHarness) {
     val createRes = subject.create(expected)
     assertThat(createRes.toCompare()).isEqualTo(expected.toCompare())
 
-    subject.get(createRes.name).let { assertThat(it?.toCompare()).isEqualTo(expected.toCompare()) }
-
-    subject.delete(createRes.name)
-    subject.get(createRes.name).let { assertThat(it).isNull() }
-  }
-
-  @Test
-  fun create_conflictingNames_Throws() {
-    val expected = BackupStub.get()
-
-    val createRes = subject.create(expected)
-    assertThat(createRes.toCompare()).isEqualTo(expected.toCompare())
-
-    assertFailsWith<ExposedSQLException> {
-      subject.create(expected)
-      // get to trigger transaction caching flush
-      subject.get(expected.name)
+    subject.get(createRes.entity.name).let {
+      assertThat(it?.toCompare()).isEqualTo(expected.toCompare())
     }
+
+    subject.delete(createRes.entity.name)
+    subject.get(createRes.entity.name).let { assertThat(it).isNull() }
   }
 
   @Test
@@ -62,6 +41,30 @@ class BackupsDalTest(harness: TestHarness) {
     val expectedUpdate = BackupStub.get().copy(name = expected.name)
     subject.update(expectedUpdate).let {
       assertThat(it?.toCompare()).isEqualTo(expectedUpdate.toCompare())
+    }
+  }
+
+  @Test
+  fun canList() {
+    val created =
+        generateSequence { subject.create(BackupStub.get()) }.take(5).map { it.entity }.toList()
+
+    val res = subject.list()
+
+    assertThat(res.map { it.entity }.toCompare()).containsExactlyElementsIn(created.toCompare())
+  }
+
+  @Test
+  fun create_conflictingNames_Throws() {
+    val expected = BackupStub.get()
+
+    val createRes = subject.create(expected)
+    assertThat(createRes.toCompare()).isEqualTo(expected.toCompare())
+
+    assertFailsWith<ExposedSQLException> {
+      subject.create(expected)
+      // get to trigger transaction caching flush
+      subject.get(expected.name)
     }
   }
 }

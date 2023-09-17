@@ -5,7 +5,6 @@ package server
 
 import com.google.common.flogger.FluentLogger
 import io.ktor.serialization.gson.gson
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.install
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
@@ -41,9 +40,7 @@ fun startServer() {
           install(AutoHeadResponse)
           install(CallLogging)
           install(StatusPages) {
-            exception<Throwable> { call, cause  ->
-              call.respondHtml { root { errorView(cause) } }
-            }
+            exception<Throwable> { call, cause -> call.respondHtml { root { errorView(cause) } } }
           }
 
           installRoutes()

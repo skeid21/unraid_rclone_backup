@@ -15,9 +15,9 @@ dependencies {
 
 tasks.test { 
     useJUnitPlatform()
-    val buildDBPath = layout.buildDirectory.file("tmp/com.unclone/sqlite/data.db").get().asFile.path
+//    val buildDBPath = layout.buildDirectory.file("tmp/com.unclone/sqlite/data.db").get().asFile.path
     jvmArgs = listOf(
-        "-Dapplication.sqlite.data_path=$buildDBPath"
+        "-Dapplication.sqlite.data_path=:memory:"
     )
 }
 

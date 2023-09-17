@@ -1,14 +1,13 @@
 package server
 
 import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.junit.jupiter.api.extension.AfterEachCallback
-import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ParameterContext
 import org.junit.jupiter.api.extension.ParameterResolutionException
 import org.junit.jupiter.api.extension.ParameterResolver
 import server.injection.newInjector
+import server.persistence.initDatabaseConnection
 
 class TestHarness {
   val injector = newInjector().apply { getInstance(Database::class.java) }
@@ -16,7 +15,7 @@ class TestHarness {
   inline fun <reified T> getInstance(): T = injector.getInstance(T::class.java)
 }
 
-class TestHarnessExtension : ParameterResolver, BeforeEachCallback, AfterEachCallback {
+class TestHarnessExtension : ParameterResolver, AfterEachCallback {
   private var harness: TestHarness? = null
 
   override fun supportsParameter(
@@ -36,13 +35,9 @@ class TestHarnessExtension : ParameterResolver, BeforeEachCallback, AfterEachCal
     throw ParameterResolutionException("Unsupported type requested")
   }
 
-  override fun beforeEach(extensionContext: ExtensionContext?) {
-    val manager = TransactionManager.managerFor(harness?.getInstance())
-    manager?.currentOrNull()?.rollback()
-    manager?.newTransaction()
-  }
-
   override fun afterEach(extensionContext: ExtensionContext?) {
-    TransactionManager.managerFor(harness?.getInstance())?.currentOrNull()?.rollback()
+    // re-initialize the db connection so the in-memory-db chagnes are not carried
+    // forward to the next test.
+    initDatabaseConnection()
   }
 }
