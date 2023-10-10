@@ -139,6 +139,6 @@ class BackupExecutorServiceTest(private val harness: TestHarness) {
             .filter { it.isRegularFile() }
             .map { it.fileName.toString() }
 
-    val sourceFiles = assertThat(copiedFiles).containsExactlyElementsIn(fileToFile.fileNames)
+    assertThat(copiedFiles).containsExactlyElementsIn(fileToFile.fileNames)
   }
 }
