@@ -11,7 +11,7 @@ import kotlinx.html.li
 import kotlinx.html.p
 import kotlinx.html.style
 import kotlinx.html.ul
-import server.injection.getInstance
+import server.getInstance
 import server.models.Backup
 import server.pages.BACKUP_DELETE
 import server.pages.BACKUP_EDIT

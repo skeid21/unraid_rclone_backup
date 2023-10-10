@@ -39,13 +39,12 @@ constructor(
   private fun Backup.isValidOrThrow(): Backup {
     fun isValidCron(cronSchedule: String): Boolean {
       val parts = cronSchedule.split(" ")
-      // Only support 5 parts cron schedule
-      if (parts.count() != 5) {
+      // Only support 6 parts cron schedule
+      if (parts.count() != 6) {
         return false
       }
 
-      // Quartz cron requires sixth part (day of month)
-      if (!CronExpression.isValidExpression("$cronSchedule ?")) {
+      if (!CronExpression.isValidExpression("$cronSchedule")) {
         return false
       }
 

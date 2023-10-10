@@ -10,8 +10,10 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.sqlite.SQLiteConfig
+import org.sqlite.SQLiteOpenMode
 import server.config
 import server.databaseFilePath
+import server.databaseNumConnections
 
 class DatabaseModule : AbstractModule() {
   @Provides
@@ -40,10 +42,16 @@ fun initDatabaseConnection() {
           HikariConfig().apply {
             driverClassName = "org.sqlite.JDBC"
             jdbcUrl = "jdbc:sqlite:${config.databaseFilePath}"
-            maximumPoolSize = 2
+            maximumPoolSize = config.databaseNumConnections
             isAutoCommit = false
             transactionIsolation = "TRANSACTION_SERIALIZABLE"
-            dataSourceProperties = SQLiteConfig().apply { enforceForeignKeys(true) }.toProperties()
+            dataSourceProperties =
+                SQLiteConfig()
+                    .apply {
+                      enforceForeignKeys(true)
+                      setOpenMode(SQLiteOpenMode.FULLMUTEX)
+                    }
+                    .toProperties()
             validate()
           })
 

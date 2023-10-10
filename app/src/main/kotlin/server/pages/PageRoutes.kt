@@ -11,7 +11,6 @@ import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import kotlinx.datetime.Clock
-import server.injection.withInstance
 import server.models.Backup
 import server.models.BackupName
 import server.models.idToName
@@ -22,6 +21,7 @@ import server.pages.views.backupListView
 import server.pages.views.backupNewView
 import server.pages.views.settingsView
 import server.services.BackupService
+import server.withInstance
 
 const val BACKUPS = "/backups"
 const val SETTINGS = "/settings"

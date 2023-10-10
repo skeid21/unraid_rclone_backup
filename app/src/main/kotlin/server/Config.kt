@@ -13,3 +13,6 @@ val config =
 
 val Properties.databaseFilePath: String
   get() = this.getProperty("application.sqlite.data_path")!!
+
+val Properties.databaseNumConnections: Int
+  get() = this.getProperty("application.sqlite.num_connections")!!.toInt()

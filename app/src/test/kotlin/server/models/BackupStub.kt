@@ -1,22 +1,32 @@
 package server.models
 
-import java.nio.file.Files
+import java.nio.file.Paths
+import kotlin.io.path.createDirectories
 import kotlin.random.Random
 import kotlinx.datetime.Instant
+import server.TestHarness
 import server.instantForTest
 import server.next
 
 object BackupStub {
-  fun get(): Backup =
+  fun get(
+      cronSchedule: String = "* * * ? * *",
+      config: String = Random.next(),
+      sourceDir: String =
+          Paths.get(TestHarness.TESTING_TEMP_DIR, Random.next<String>())
+              .createDirectories()
+              .toString(),
+      destinationDir: String = Random.next()
+  ): Backup =
       Backup(
           name = "backups/${Random.next<String>()}".asBackupName(),
           createTime = instantForTest(),
           lastSuccessfulRunTime = null,
           displayName = Random.next(),
-          cronSchedule = "0 * * * *",
-          sourceDir = Files.createTempDirectory("com.unraid").toString(),
-          destinationDir = Random.next(),
-          config = Random.next())
+          cronSchedule = cronSchedule,
+          sourceDir = sourceDir,
+          destinationDir = destinationDir,
+          config = config)
 }
 
 fun Backup.toCompare(): Backup = this.copy(createTime = Instant.fromEpochMilliseconds(0))

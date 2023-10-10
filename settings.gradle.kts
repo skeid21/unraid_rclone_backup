@@ -14,6 +14,7 @@ include("protos")
 
 plugins {
     kotlin("jvm") version "1.9.0" apply false
+    kotlin("plugin.serialization") version "1.9.10" apply false
 }
 
 dependencyResolutionManagement {
@@ -53,7 +54,10 @@ dependencyResolutionManagement {
             //Kotlinx
             //
             version("kotlinx", "1.7.3")
-            library("kotlinx-coroutines-core", "org.jetbrains.kotlinx", "kotlinx-coroutines-core").versionRef("kotlinx")
+            library("kotlinx-coroutines-core", "org.jetbrains.kotlinx", "kotlinx-coroutines-core").version("1.7.3")
+            library("kotlinx-serialization-json", "org.jetbrains.kotlinx", "kotlinx-serialization-json").version("1.6.0")
+
+            bundle("kotlinx", listOf("kotlinx-coroutines-core", "kotlinx-serialization-json"))
 
             //
             // Shared

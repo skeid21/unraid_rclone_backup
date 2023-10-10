@@ -1,7 +1,7 @@
 package server.pages.views
 
 import kotlinx.html.ARTICLE
-import server.injection.getInstance
+import server.getInstance
 import server.models.BackupName
 import server.pages.BACKUP_EDIT
 import server.pages.templates.backupForm

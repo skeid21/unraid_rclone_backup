@@ -1,7 +1,9 @@
 package server.models
 
 import kotlinx.datetime.Instant
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class BackupName(val value: String) {
   val id: String
 
@@ -21,6 +23,7 @@ fun String.asBackupName() = BackupName(this)
 
 fun String.idToName() = BackupName("backups/$this")
 
+@Serializable
 data class Backup(
     /** The unique resource name for the backup */
     val name: BackupName,

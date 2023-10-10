@@ -1,10 +1,18 @@
-package server.injection
+package server
 
+import com.google.inject.Binder
 import com.google.inject.Guice
 import com.google.inject.Injector
+import com.google.inject.Module
 import server.persistence.DatabaseModule
 
-fun newInjector(): Injector = Guice.createInjector(DatabaseModule())!!
+class AppModule : Module {
+  override fun configure(binder: Binder) {
+    binder.install(DatabaseModule())
+  }
+}
+
+fun newInjector(): Injector = Guice.createInjector(AppModule())!!
 
 val injector = newInjector()
 
