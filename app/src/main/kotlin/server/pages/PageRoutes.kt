@@ -13,6 +13,7 @@ import io.ktor.server.routing.post
 import kotlinx.datetime.Clock
 import server.models.Backup
 import server.models.BackupName
+import server.models.BackupResultStatus
 import server.models.idToName
 import server.pages.templates.root
 import server.pages.views.backupDetailView
@@ -20,6 +21,7 @@ import server.pages.views.backupEditView
 import server.pages.views.backupListView
 import server.pages.views.backupNewView
 import server.pages.views.settingsView
+import server.services.BackupExecutorService
 import server.services.BackupService
 import server.withInstance
 
@@ -64,7 +66,8 @@ fun Routing.installIndexPageIngress() {
   post(BACKUP_EDIT) {
     withInstance<BackupService> {
       val backupName = call.parameters["backup_id"]!!.idToName()
-      val backup = call.receiveParameters().toBackup(backupName)
+      val currentBackup = get(backupName)
+      val backup = call.receiveParameters().toBackup(currentBackup)
 
       update(backup)
 
@@ -81,9 +84,10 @@ fun Routing.installIndexPageIngress() {
     withInstance<BackupService> {
       val backup = call.receiveParameters().toBackup(null)
       create(backup)
-
-      call.redirectToHome()
     }
+
+    withInstance<BackupExecutorService> { ensureBackupJobsExist() }
+    call.redirectToHome()
   }
 
   //
@@ -94,17 +98,19 @@ fun Routing.installIndexPageIngress() {
   }
 }
 
-fun Parameters.toBackup(backupName: BackupName?): Backup {
+fun Parameters.toBackup(backup: Backup?): Backup {
 
   val displayName = this["displayName"].toString()
-  val name = backupName ?: displayName.idToName()
+  val name = backup?.name ?: displayName.idToName()
 
   return Backup(
       name = name,
       // create time is ignored on update and create
       createTime = Clock.System.now(),
-      // lastSuccessfulRunTime is ignored on update and create
-      lastSuccessfulRunTime = null,
+      // lastSuccessfulRunTime is ignored on update and create from user
+      lastRunTime = backup?.lastRunTime,
+      // lastRunResult  is ignored on update and create from user
+      lastRunResult = backup?.lastRunResult ?: BackupResultStatus.Unknown,
       displayName = displayName,
       cronSchedule = this["cronSchedule"].toString(),
       sourceDir = this["sourceDir"].toString(),

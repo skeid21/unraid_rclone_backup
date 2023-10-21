@@ -14,8 +14,8 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import server.models.BackupName
 import server.models.BackupResult
 import server.models.BackupResultName
+import server.models.BackupResultStatus
 import server.models.asBackupResultName
-import server.persistence.Backups.uniqueIndex
 
 /** Data definition for the BackupResults table */
 object BackupResults : IntIdTable() {
@@ -80,5 +80,5 @@ fun DAOBackupResult.toBackupResult() =
         name = name.asBackupResultName(),
         startTime = startTime,
         endTime = endTime,
-        result = BackupResult.Result.valueOf(result),
+        result = BackupResultStatus.valueOf(result),
         output = output)

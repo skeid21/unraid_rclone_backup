@@ -23,15 +23,19 @@ import server.models.Backup
 import server.models.BackupName
 import server.models.BackupResult
 import server.models.BackupResultName
+import server.models.BackupResultStatus
 
-class BackupExecutorService @Inject constructor(jobFactory: JobFactory) {
+class BackupExecutorService
+@Inject
+constructor(private val backupService: BackupService, jobFactory: JobFactory) {
   init {
     scheduler.setJobFactory(jobFactory)
   }
 
   data class JobDescription(val backupName: BackupName, val cronSchedule: String)
 
-  fun ensureJobsExist(backups: List<Backup>) {
+  fun ensureBackupJobsExist() {
+    val backups = backupService.list()
     fun trigger(triggerName: String, jobKey: JobKey, backup: Backup): Trigger =
         newTrigger()
             .withIdentity(triggerName, GROUP)
@@ -113,11 +117,10 @@ constructor(
   override fun execute(context: JobExecutionContext) {
     val startTime = Clock.System.now()
     val backupName = context.jobDetail.backupName
-    val backup = backupService.get(backupName)
     fun backupResultName() =
         BackupResultName("${backupName.value}/backupResults/${UUID.randomUUID()}")
 
-    fun createBackupResults(endTime: Instant, result: BackupResult.Result, output: String) {
+    fun createBackupResults(endTime: Instant, result: BackupResultStatus, output: String) {
       backupResultService.create(
           BackupResult(
               name = backupResultName(),
@@ -129,8 +132,9 @@ constructor(
 
     val configFile = File.createTempFile("rclone-config", "tmp")
     try {
+      val backup = backupService.get(backupName)!!
       // write config to temp location
-      configFile.writeText(backup!!.config)
+      configFile.writeText(backup.config)
       // TODO - remote expected the be the remote name
       val p =
           ProcessBuilder(
@@ -152,10 +156,18 @@ constructor(
               ""
             }
           }
-      createBackupResults(Clock.System.now(), BackupResult.Result.Success, output)
+      createBackupResults(Clock.System.now(), BackupResultStatus.Success, output)
+      backupService.get(backupName)?.let {
+        backupService.update(
+            it.copy(lastRunTime = Clock.System.now(), lastRunResult = BackupResultStatus.Success))
+      }
     } catch (t: Throwable) {
       createBackupResults(
-          Clock.System.now(), BackupResult.Result.Failure, t.message ?: t.javaClass.name)
+          Clock.System.now(), BackupResultStatus.Failure, t.message ?: t.javaClass.name)
+      backupService.get(backupName)?.let {
+        backupService.update(
+            it.copy(lastRunTime = Clock.System.now(), lastRunResult = BackupResultStatus.Failure))
+      }
     } finally {
       configFile.delete()
     }

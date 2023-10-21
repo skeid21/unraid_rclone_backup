@@ -13,13 +13,15 @@ import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
 import org.jetbrains.exposed.sql.transactions.transaction
 import server.models.Backup
 import server.models.BackupName
+import server.models.BackupResultStatus
 import server.models.asBackupName
 
 /** Data definition for the Backups table* */
 object Backups : IntIdTable() {
   val name: Column<String> = varchar("name", 2083).uniqueIndex()
   val createTime: Column<Instant> = timestamp("create_time")
-  val lastSuccessfulRunTime: Column<Instant?> = timestamp("last_successful_run_time").nullable()
+  val lastRunTime: Column<Instant?> = timestamp("last_run_time").nullable()
+  val lastRunResult: Column<String> = varchar("last_run_result", 50)
   val displayName: Column<String> = varchar("display_name", 256)
   val cronSchedule: Column<String> = varchar("cron_schedule", 256)
   val sourceDir: Column<String> = varchar("source_dir", 4096)
@@ -33,7 +35,8 @@ class DAOBackup(id: EntityID<Int>) : IntEntity(id) {
 
   var name by Backups.name
   var createTime by Backups.createTime
-  var lastSuccessfulRunTime by Backups.lastSuccessfulRunTime
+  var lastRunTime by Backups.lastRunTime
+  var lastRunResult by Backups.lastRunResult
   var displayName by Backups.displayName
   var cronSchedule by Backups.cronSchedule
   var sourceDir by Backups.sourceDir
@@ -68,7 +71,8 @@ class BackupsDal @Inject constructor(private val db: Database) {
 
 /** Update the [DAOBackup] with fields from the specified [Backup] */
 private fun DAOBackup.update(backup: Backup) {
-  lastSuccessfulRunTime = backup.lastSuccessfulRunTime
+  lastRunTime = backup.lastRunTime
+  lastRunResult = backup.lastRunResult.name
   displayName = backup.displayName
   cronSchedule = backup.cronSchedule
   sourceDir = backup.sourceDir
@@ -81,7 +85,8 @@ private fun DAOBackup.toBackup(): Backup =
     Backup(
         name = name.asBackupName(),
         createTime = createTime,
-        lastSuccessfulRunTime = lastSuccessfulRunTime,
+        lastRunTime = lastRunTime,
+        lastRunResult = BackupResultStatus.valueOf(lastRunResult),
         displayName = displayName,
         cronSchedule = cronSchedule,
         sourceDir = sourceDir,

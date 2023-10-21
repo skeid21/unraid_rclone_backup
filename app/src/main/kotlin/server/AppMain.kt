@@ -43,6 +43,8 @@ fun startServer() {
           installRoutes()
         }
 
+    // Creates jobs for all backups
+    withInstance<BackupExecutorService> { ensureBackupJobsExist() }
     server!!.start(wait = true)
 
     logger.atInfo().log("Server has exited")
