@@ -15,25 +15,15 @@ constructor(
     private val backupsDal: BackupsDal,
 ) {
 
-  fun create(backup: Backup): Backup {
-    return backupsDal.create(backup.isValidOrThrow())
-  }
+  fun create(backup: Backup): Backup = backupsDal.create(backup.isValidOrThrow())
 
-  fun get(backupName: BackupName): Backup? {
-    return backupsDal.get(backupName)
-  }
+  fun get(backupName: BackupName): Backup? = backupsDal.get(backupName)
 
-  fun list(): List<Backup> {
-    return backupsDal.list()
-  }
+  fun list(): List<Backup> = backupsDal.list()
 
-  fun update(backup: Backup): Backup? {
-    return backupsDal.update(backup.isValidOrThrow())
-  }
+  fun update(backup: Backup): Backup? = backupsDal.update(backup.isValidOrThrow())
 
-  fun delete(backupName: BackupName) {
-    backupsDal.delete(backupName)
-  }
+  fun delete(backupName: BackupName) = backupsDal.delete(backupName)
 
   /** Will throw a [BadRequestException] if the backup is not valid */
   private fun Backup.isValidOrThrow(): Backup {

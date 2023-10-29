@@ -29,10 +29,6 @@ data class Backup(
     val name: BackupName,
     /** The creation time for this backup */
     val createTime: Instant,
-    /** The last time that this backup ran */
-    val lastRunTime: Instant?,
-    /** The result of the last run */
-    val lastRunResult: BackupResultStatus,
     /** The display name for the backup */
     val displayName: String,
     /** A cron schedule string used to schedule the backup */
@@ -44,9 +40,3 @@ data class Backup(
     /** The rclone configuration to use* */
     val config: String
 )
-
-enum class BackupResultStatus {
-  Unknown,
-  Success,
-  Failure,
-}

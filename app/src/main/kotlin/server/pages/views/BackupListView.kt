@@ -13,13 +13,15 @@ import kotlinx.html.style
 import kotlinx.html.ul
 import server.getInstance
 import server.models.Backup
+import server.models.BackupResult
 import server.pages.BACKUP_DELETE
 import server.pages.BACKUP_EDIT
 import server.pages.BACKUP_NEW
 import server.pages.withBackupId
+import server.services.BackupResultService
 import server.services.BackupService
 
-private fun UL.backupListItem(backup: Backup) {
+private fun UL.backupListItem(backup: Backup, backupResult: BackupResult?) {
   li(classes = "collection-item") {
     div(classes = "card small") {
       a {
@@ -29,13 +31,13 @@ private fun UL.backupListItem(backup: Backup) {
           div(classes = "card-title") { +backup.displayName }
 
           val lastRun =
-              if (backup.lastRunTime != null) {
-                backup.lastRunTime.toLocalDateTime(TimeZone.currentSystemDefault())
+              if (backupResult != null) {
+                backupResult.endTime.toLocalDateTime(TimeZone.currentSystemDefault())
               } else {
                 "Never"
               }
           p { +"Last Run: $lastRun " }
-          p { +"Last Run Result: ${backup.lastRunResult}" }
+          p { +"Last Run Result: ${backupResult?.status ?: ""}" }
           p { +"Created: ${backup.createTime.toLocalDateTime(TimeZone.currentSystemDefault())}" }
         }
       }
@@ -59,5 +61,8 @@ fun ARTICLE.backupListView() {
     i(classes = "material-icons") { +"add" }
   }
 
-  ul(classes = "collection") { backups.forEach { backupListItem(it) } }
+  val backupResultService = getInstance<BackupResultService>()
+  ul(classes = "collection") {
+    backups.forEach { backupListItem(it, backupResultService.getMostRecentResult(it.name)) }
+  }
 }

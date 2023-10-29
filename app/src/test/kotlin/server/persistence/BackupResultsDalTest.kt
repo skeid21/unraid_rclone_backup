@@ -2,6 +2,7 @@ package server.persistence
 
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.assertFailsWith
+import kotlinx.datetime.Instant
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -38,10 +39,28 @@ class BackupResultsDalTest(private val harness: TestHarness) {
 
   @Test
   fun canList() {
+    var offsetFromEpoch: Long = 0
+    val generated =
+        generateSequence {
+              val backupResult =
+                  BackupResultStub.get(backupName)
+                      .copy(
+                          startTime = Instant.fromEpochSeconds(offsetFromEpoch++),
+                          endTime = Instant.fromEpochSeconds(offsetFromEpoch++))
+              subject.create(backupResult)
+            }
+            .take(5)
+            .toList()
+
+    val expected = generated.last()
+
+    subject.getMostRecentResult(backupName).let { res -> assertThat(res).isEqualTo(expected) }
+  }
+
+  @Test
+  fun canGetMostRecentResult() {
     val expected =
         generateSequence { subject.create(BackupResultStub.get(backupName)) }.take(5).toList()
-
-    subject.list(backupName).let { res -> assertThat(res).isEqualTo(expected) }
   }
 
   @Test

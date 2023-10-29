@@ -9,12 +9,12 @@ import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.ReferenceOption
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
 import org.jetbrains.exposed.sql.transactions.transaction
 import server.models.BackupName
 import server.models.BackupResult
 import server.models.BackupResultName
-import server.models.BackupResultStatus
 import server.models.asBackupResultName
 
 /** Data definition for the BackupResults table */
@@ -23,7 +23,7 @@ object BackupResults : IntIdTable() {
   val parentName: Column<String> = varchar("parent_name", 2083)
   val startTime: Column<Instant> = timestamp("start_time")
   val endTime: Column<Instant> = timestamp("end_time")
-  val result: Column<String> = varchar("result", 50)
+  val status: Column<String> = varchar("result", 50)
   val output: Column<String> = text("output")
 
   init {
@@ -42,7 +42,7 @@ class DAOBackupResult(id: EntityID<Int>) : IntEntity(id) {
   var parentName by BackupResults.parentName
   var startTime by BackupResults.startTime
   var endTime by BackupResults.endTime
-  var result by BackupResults.result
+  var status by BackupResults.status
   var output by BackupResults.output
 }
 
@@ -54,7 +54,7 @@ class BackupResultsDal @Inject constructor(private val db: Database) {
               parentName = backupResult.name.parent.value
               startTime = backupResult.startTime
               endTime = backupResult.endTime
-              result = backupResult.result.name
+              status = backupResult.status.name
               output = backupResult.output
             }
           }
@@ -62,6 +62,14 @@ class BackupResultsDal @Inject constructor(private val db: Database) {
 
   fun get(name: BackupResultName): BackupResult? =
       transaction(db) { getByName(name) }?.toBackupResult()
+
+  fun getMostRecentResult(parentName: BackupName): BackupResult? =
+      transaction(db) {
+        DAOBackupResult.find { BackupResults.parentName eq parentName.value }
+            .orderBy(BackupResults.endTime to SortOrder.ASC)
+            .lastOrNull()
+            ?.toBackupResult()
+      }
 
   fun list(parentName: BackupName): List<BackupResult> =
       transaction(db) {
@@ -80,5 +88,5 @@ fun DAOBackupResult.toBackupResult() =
         name = name.asBackupResultName(),
         startTime = startTime,
         endTime = endTime,
-        result = BackupResultStatus.valueOf(result),
+        status = BackupResult.Status.valueOf(status),
         output = output)

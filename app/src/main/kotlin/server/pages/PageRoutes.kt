@@ -13,7 +13,6 @@ import io.ktor.server.routing.post
 import kotlinx.datetime.Clock
 import server.models.Backup
 import server.models.BackupName
-import server.models.BackupResultStatus
 import server.models.idToName
 import server.pages.templates.root
 import server.pages.views.backupDetailView
@@ -107,10 +106,6 @@ fun Parameters.toBackup(backup: Backup?): Backup {
       name = name,
       // create time is ignored on update and create
       createTime = Clock.System.now(),
-      // lastSuccessfulRunTime is ignored on update and create from user
-      lastRunTime = backup?.lastRunTime,
-      // lastRunResult  is ignored on update and create from user
-      lastRunResult = backup?.lastRunResult ?: BackupResultStatus.Unknown,
       displayName = displayName,
       cronSchedule = this["cronSchedule"].toString(),
       sourceDir = this["sourceDir"].toString(),

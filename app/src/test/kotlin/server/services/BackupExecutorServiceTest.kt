@@ -2,6 +2,8 @@ package server.services
 
 import com.google.common.truth.Truth.assertThat
 import java.nio.file.Path
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.deleteRecursively
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.listDirectoryEntries
 import org.junit.jupiter.api.Test
@@ -9,7 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import server.TestHarness
 import server.TestHarnessExtension
 import server.models.Backup
-import server.models.BackupResultStatus
+import server.models.BackupResult
 import server.models.BackupStub
 
 @ExtendWith(TestHarnessExtension::class)
@@ -86,6 +88,35 @@ class BackupExecutorServiceTest(private val harness: TestHarness) {
     }
   }
 
+  @OptIn(ExperimentalPathApi::class)
+  @Test
+  fun backupJobReportsErrorOnMissingSourceDir() {
+    val fileToFile = harness.setupLocalFileToFileConfigTest()
+    val backupService: BackupService = harness.getInstance()
+    val backupResultService: BackupResultService = harness.getInstance()
+
+    val backup =
+        backupService.create(
+            BackupStub.get(
+                // evey 5 seconds
+                cronSchedule = "0/5 * * ? * *",
+                sourceDir = fileToFile.sourceDir,
+                destinationDir = fileToFile.destinationDir,
+                config = fileToFile.config))
+
+    // Delete source dir to elicit a failure
+    Path.of(fileToFile.sourceDir).deleteRecursively()
+
+    subject.ensureBackupJobsExist()
+    var backupResults = backupResultService.list(backup.name)
+    while (backupResults.isEmpty()) {
+      backupResults = backupResultService.list(backup.name)
+    }
+
+    val result = backupResults.first()
+    assertThat(result.status).isEqualTo(BackupResult.Status.Failure)
+  }
+
   @Test
   fun backupJobSuccessfullyRuns() {
     val fileToFile = harness.setupLocalFileToFileConfigTest()
@@ -108,7 +139,7 @@ class BackupExecutorServiceTest(private val harness: TestHarness) {
     }
 
     val result = backupResults.first()
-    assertThat(result.result).isEqualTo(BackupResultStatus.Success)
+    assertThat(result.status).isEqualTo(BackupResult.Status.Success)
 
     val copiedFiles =
         Path.of(fileToFile.destinationDir)
@@ -117,10 +148,5 @@ class BackupExecutorServiceTest(private val harness: TestHarness) {
             .map { it.fileName.toString() }
 
     assertThat(copiedFiles).containsExactlyElementsIn(fileToFile.fileNames)
-
-    backupService.get(backup.name).let {
-      assertThat(it?.lastRunResult).isNotNull()
-      assertThat(it?.lastRunResult).isEqualTo(BackupResultStatus.Success)
-    }
   }
 }

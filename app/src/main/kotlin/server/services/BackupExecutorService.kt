@@ -3,6 +3,8 @@ package server.services
 import jakarta.inject.Inject
 import java.io.File
 import java.util.UUID
+import kotlin.io.path.Path
+import kotlin.io.path.exists
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.quartz.CronScheduleBuilder.cronSchedule
@@ -23,7 +25,6 @@ import server.models.Backup
 import server.models.BackupName
 import server.models.BackupResult
 import server.models.BackupResultName
-import server.models.BackupResultStatus
 
 class BackupExecutorService
 @Inject
@@ -120,19 +121,22 @@ constructor(
     fun backupResultName() =
         BackupResultName("${backupName.value}/backupResults/${UUID.randomUUID()}")
 
-    fun createBackupResults(endTime: Instant, result: BackupResultStatus, output: String) {
+    fun createBackupResults(endTime: Instant, status: BackupResult.Status, output: String) {
       backupResultService.create(
           BackupResult(
               name = backupResultName(),
               startTime = startTime,
               endTime = endTime,
               output = output,
-              result = result))
+              status = status))
     }
 
     val configFile = File.createTempFile("rclone-config", "tmp")
     try {
       val backup = backupService.get(backupName)!!
+      if (!Path(backup.sourceDir).exists()) {
+        throw IllegalStateException("Source dir: ${backup.sourceDir} does not exist")
+      }
       // write config to temp location
       configFile.writeText(backup.config)
       // TODO - remote expected the be the remote name
@@ -156,18 +160,10 @@ constructor(
               ""
             }
           }
-      createBackupResults(Clock.System.now(), BackupResultStatus.Success, output)
-      backupService.get(backupName)?.let {
-        backupService.update(
-            it.copy(lastRunTime = Clock.System.now(), lastRunResult = BackupResultStatus.Success))
-      }
+      createBackupResults(Clock.System.now(), BackupResult.Status.Success, output)
     } catch (t: Throwable) {
       createBackupResults(
-          Clock.System.now(), BackupResultStatus.Failure, t.message ?: t.javaClass.name)
-      backupService.get(backupName)?.let {
-        backupService.update(
-            it.copy(lastRunTime = Clock.System.now(), lastRunResult = BackupResultStatus.Failure))
-      }
+          Clock.System.now(), BackupResult.Status.Failure, t.message ?: t.javaClass.name)
     } finally {
       configFile.delete()
     }

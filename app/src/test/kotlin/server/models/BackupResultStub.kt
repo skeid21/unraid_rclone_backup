@@ -10,7 +10,7 @@ object BackupResultStub {
           name = "${backupName.value}/backupResults/${Random.next<String>()}".asBackupResultName(),
           startTime = instantForTest(),
           endTime = instantForTest(),
-          result = BackupResultStatus.Success,
+          status = BackupResult.Status.Success,
           output = "output",
       )
 }

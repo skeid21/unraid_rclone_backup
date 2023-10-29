@@ -21,8 +21,6 @@ object BackupStub {
       Backup(
           name = "backups/${Random.next<String>()}".asBackupName(),
           createTime = instantForTest(),
-          lastRunTime = null,
-          lastRunResult = BackupResultStatus.Unknown,
           displayName = Random.next(),
           cronSchedule = cronSchedule,
           sourceDir = sourceDir,

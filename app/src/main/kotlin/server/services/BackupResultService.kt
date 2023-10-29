@@ -11,6 +11,9 @@ class BackupResultService @Inject constructor(private val backupResultsDal: Back
 
   fun get(name: BackupResultName): BackupResult? = backupResultsDal.get(name)
 
+  fun getMostRecentResult(parent: BackupName): BackupResult? =
+      backupResultsDal.getMostRecentResult(parent)
+
   fun list(parent: BackupName): List<BackupResult> = backupResultsDal.list(parent)
 
   fun delete(name: BackupResultName) = backupResultsDal.delete(name)

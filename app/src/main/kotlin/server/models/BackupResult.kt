@@ -29,8 +29,15 @@ data class BackupResult(
     val startTime: Instant,
     /** The time that the backup process ended */
     val endTime: Instant,
-    /** The result of the backup process */
-    val result: BackupResultStatus,
+    /** The status of the backup process */
+    val status: Status,
     /** The output of the backup process */
     val output: String
-) {}
+) {
+
+  enum class Status {
+    Unknown,
+    Success,
+    Failure,
+  }
+}
