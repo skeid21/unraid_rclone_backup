@@ -3,8 +3,6 @@ package server.services
 import jakarta.inject.Inject
 import java.io.File
 import java.util.UUID
-import kotlin.io.path.Path
-import kotlin.io.path.exists
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.quartz.CronScheduleBuilder.cronSchedule
@@ -115,11 +113,25 @@ constructor(
     private val backupService: BackupService,
     private val backupResultService: BackupResultService
 ) : Job {
+  private fun deleteExcessResults(backupName: BackupName) {
+    val results = backupResultService.list(backupName)
+    if (results.count() > 10) {
+      results
+          .sortedBy { it.endTime }
+          .map { it.name }
+          .take(results.count() - 10)
+          .forEach { backupResultService.delete(it) }
+    }
+  }
+
   override fun execute(context: JobExecutionContext) {
-    val startTime = Clock.System.now()
+
     val backupName = context.jobDetail.backupName
+    deleteExcessResults(backupName)
+
     fun backupResultName() =
         BackupResultName("${backupName.value}/backupResults/${UUID.randomUUID()}")
+    val startTime = Clock.System.now()
 
     fun createBackupResults(endTime: Instant, status: BackupResult.Status, output: String) {
       backupResultService.create(
@@ -134,15 +146,14 @@ constructor(
     val configFile = File.createTempFile("rclone-config", "tmp")
     try {
       val backup = backupService.get(backupName)!!
-      if (!Path(backup.sourceDir).exists()) {
-        throw IllegalStateException("Source dir: ${backup.sourceDir} does not exist")
-      }
+
       // write config to temp location
       configFile.writeText(backup.config)
       // TODO - remote expected the be the remote name
       val p =
           ProcessBuilder(
                   "rclone",
+                  "--log-level=INFO",
                   "--config",
                   configFile.absolutePath,
                   "sync",
@@ -150,6 +161,8 @@ constructor(
                   "remote:${backup.destinationDir}")
               .redirectErrorStream(true)
               .start()
+
+      p.waitFor()
 
       val output =
           p.inputReader().let {
@@ -160,7 +173,15 @@ constructor(
               ""
             }
           }
-      createBackupResults(Clock.System.now(), BackupResult.Status.Success, output)
+
+      val status =
+          if (p.exitValue() != 0) {
+            BackupResult.Status.Failure
+          } else {
+            BackupResult.Status.Success
+          }
+
+      createBackupResults(Clock.System.now(), status, output)
     } catch (t: Throwable) {
       createBackupResults(
           Clock.System.now(), BackupResult.Status.Failure, t.message ?: t.javaClass.name)

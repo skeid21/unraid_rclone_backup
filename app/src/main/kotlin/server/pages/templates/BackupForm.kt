@@ -13,9 +13,10 @@ import kotlinx.html.style
 import kotlinx.html.textArea
 import server.models.Backup
 
-fun ARTICLE.backupForm(backup: Backup?, formActionUrl: String) {
+fun ARTICLE.backupForm(backup: Backup?, formActionUrl: String?) {
+  val disableEditing = formActionUrl == null
   form(
-      action = formActionUrl,
+      action = formActionUrl ?: "",
       method = FormMethod.post,
       encType = FormEncType.applicationXWwwFormUrlEncoded) {
         style = "margin:15px;"
@@ -39,6 +40,7 @@ fun ARTICLE.backupForm(backup: Backup?, formActionUrl: String) {
           input(type = InputType.text) {
             id = "displayName"
             name = id
+            disabled = disableEditing
             value = backup?.displayName ?: ""
           }
           label {
@@ -50,6 +52,7 @@ fun ARTICLE.backupForm(backup: Backup?, formActionUrl: String) {
           input(type = InputType.text) {
             id = "cronSchedule"
             name = id
+            disabled = disableEditing
             value = backup?.cronSchedule ?: ""
             placeholder = "0 0 2 ? * * (Quartz CRON, Every day at 2AM)"
           }
@@ -62,6 +65,7 @@ fun ARTICLE.backupForm(backup: Backup?, formActionUrl: String) {
           input(type = InputType.text) {
             id = "sourceDir"
             name = id
+            disabled = disableEditing
             value = backup?.destinationDir ?: ""
           }
           label {
@@ -74,6 +78,7 @@ fun ARTICLE.backupForm(backup: Backup?, formActionUrl: String) {
           input(type = InputType.text) {
             id = "destinationDir"
             name = id
+            disabled = disableEditing
             value = backup?.destinationDir ?: ""
           }
           label {
@@ -86,6 +91,7 @@ fun ARTICLE.backupForm(backup: Backup?, formActionUrl: String) {
           textArea(classes = "materialize-textarea") {
             id = "config"
             name = id
+            disabled = disableEditing
             +testAreaContent
           }
           label {
@@ -93,8 +99,10 @@ fun ARTICLE.backupForm(backup: Backup?, formActionUrl: String) {
             +"Config"
           }
         }
-        input(classes = "right btn waves-effect indigo lighten-2", type = InputType.submit) {
-          value = "Submit"
+        if (!disableEditing) {
+          input(classes = "right btn waves-effect indigo lighten-2", type = InputType.submit) {
+            value = "Submit"
+          }
         }
       }
 }

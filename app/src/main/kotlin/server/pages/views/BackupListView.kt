@@ -15,7 +15,7 @@ import server.getInstance
 import server.models.Backup
 import server.models.BackupResult
 import server.pages.BACKUP_DELETE
-import server.pages.BACKUP_EDIT
+import server.pages.BACKUP_DETAIL
 import server.pages.BACKUP_NEW
 import server.pages.withBackupId
 import server.services.BackupResultService
@@ -26,7 +26,7 @@ private fun UL.backupListItem(backup: Backup, backupResult: BackupResult?) {
     div(classes = "card small") {
       a {
         style = "text-decoration:none; color:inherit"
-        href = BACKUP_EDIT.withBackupId(backup.name)
+        href = BACKUP_DETAIL.withBackupId(backup.name)
         div(classes = "card-content") {
           div(classes = "card-title") { +backup.displayName }
 
@@ -56,7 +56,7 @@ private fun UL.backupListItem(backup: Backup, backupResult: BackupResult?) {
 fun ARTICLE.backupListView() {
   val backups = getInstance<BackupService>().list()
   a(classes = "btn-floating btn waves-effect waves-light indigo darken-2 ") {
-    style = "position: fixed; right:10px; bottom:10px"
+    style = "position: fixed; right:20px; bottom:20px"
     href = BACKUP_NEW
     i(classes = "material-icons") { +"add" }
   }
