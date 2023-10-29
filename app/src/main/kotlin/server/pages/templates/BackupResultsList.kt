@@ -10,6 +10,7 @@ import kotlinx.html.id
 import kotlinx.html.label
 import kotlinx.html.li
 import kotlinx.html.p
+import kotlinx.html.style
 import kotlinx.html.textArea
 import kotlinx.html.ul
 import server.getInstance
@@ -19,7 +20,7 @@ import server.services.BackupResultService
 
 private fun UL.backupResultsListItem(backupResult: BackupResult) {
   li(classes = "collection-item") {
-    div(classes = "card small") {
+    div(classes = "card medium") {
       div(classes = "card-content") {
         div(classes = "card-title") { +"${backupResult.name.value}" }
         p {
@@ -33,6 +34,7 @@ private fun UL.backupResultsListItem(backupResult: BackupResult) {
             +"Output"
           }
           textArea(classes = "materialize-textarea") {
+            style = "max-height: 200px; overflow: auto"
             id = "output"
             contentEditable = false
             text(backupResult.output)
