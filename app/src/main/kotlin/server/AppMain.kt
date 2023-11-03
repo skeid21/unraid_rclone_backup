@@ -17,6 +17,7 @@ import io.ktor.server.plugins.defaultheaders.DefaultHeaders
 import io.ktor.server.plugins.statuspages.StatusPages
 import server.pages.templates.root
 import server.pages.views.errorView
+import server.persistence.DatabaseFactory
 import server.services.BackupExecutorService
 
 private val logger = FluentLogger.forEnclosingClass()
@@ -27,6 +28,11 @@ fun startServer() {
   logger.atInfo().log("Starting server")
 
   try {
+    DatabaseFactory.applyMigrations()
+
+    // Creates jobs for all backups
+    withInstance<BackupExecutorService> { ensureBackupJobsExist() }
+
     server =
         embeddedServer(Netty, host = "0.0.0.0", port = 8080) {
           install(ContentNegotiation) { gson() }
@@ -43,8 +49,6 @@ fun startServer() {
           installRoutes()
         }
 
-    // Creates jobs for all backups
-    withInstance<BackupExecutorService> { ensureBackupJobsExist() }
     server!!.start(wait = true)
 
     logger.atInfo().log("Server has exited")

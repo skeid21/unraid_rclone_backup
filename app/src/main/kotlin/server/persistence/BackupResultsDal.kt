@@ -23,7 +23,7 @@ object BackupResults : IntIdTable() {
   val parentName: Column<String> = varchar("parent_name", 2083)
   val startTime: Column<Instant> = timestamp("start_time")
   val endTime: Column<Instant> = timestamp("end_time")
-  val status: Column<String> = varchar("result", 50)
+  val status: Column<String> = varchar("status", 50)
   val output: Column<String> = text("output")
 
   init {

@@ -2,21 +2,26 @@ package server
 
 import com.google.inject.Guice
 import com.google.inject.Injector
+import com.google.inject.Stage
+import com.google.inject.util.Modules
 import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.io.path.createDirectories
 import kotlin.random.Random
 import org.junit.jupiter.api.extension.AfterEachCallback
+import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ParameterContext
 import org.junit.jupiter.api.extension.ParameterResolutionException
 import org.junit.jupiter.api.extension.ParameterResolver
-import server.persistence.initDatabaseConnection
+import server.persistence.DatabaseModuleTest
 import server.services.BackupExecutorService
 
-class TestHarness {
-  val injector: Injector = Guice.createInjector(AppModule())
+class TestHarness() {
+  val injector: Injector =
+      Guice.createInjector(
+          Stage.DEVELOPMENT, Modules.override(AppModule()).with(DatabaseModuleTest()))
 
   inline fun <reified T> getInstance(): T = injector.getInstance(T::class.java)
 
@@ -60,9 +65,8 @@ class TestHarness {
   }
 }
 
-class TestHarnessExtension : ParameterResolver, AfterEachCallback, BeforeEachCallback {
-  private var harness: TestHarness? = null
-
+class TestHarnessExtension :
+    ParameterResolver, BeforeAllCallback, AfterEachCallback, BeforeEachCallback {
   override fun supportsParameter(
       paramContext: ParameterContext,
       extensionContext: ExtensionContext
@@ -73,8 +77,7 @@ class TestHarnessExtension : ParameterResolver, AfterEachCallback, BeforeEachCal
       extensionContext: ExtensionContext
   ): Any {
     if (paramContext.parameter.type == TestHarness::class.java) {
-      harness = TestHarness()
-      return harness!!
+      return TestHarness()
     }
 
     throw ParameterResolutionException("Unsupported type requested")
@@ -86,8 +89,10 @@ class TestHarnessExtension : ParameterResolver, AfterEachCallback, BeforeEachCal
 
   override fun afterEach(extensionContext: ExtensionContext?) {
     BackupExecutorService.teardown()
-    // re-initialize the db connection so the in-memory-db changes are not carried
-    // forward to the next test.
-    initDatabaseConnection()
+    DatabaseModuleTest.initDatabaseForTesting()
+  }
+
+  override fun beforeAll(extensionContext: ExtensionContext?) {
+    DatabaseModuleTest.initDatabaseForTesting()
   }
 }

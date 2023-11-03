@@ -88,13 +88,15 @@ dependencyResolutionManagement {
             library("exposed-dao", "org.jetbrains.exposed", "exposed-dao").versionRef("exposed")
             library("exposed-kotlin-datetime", "org.jetbrains.exposed", "exposed-kotlin-datetime").versionRef("exposed")
             library("sqlite-jbdc", "org.xerial", "sqlite-jdbc").version("3.42.0.0")
+            library("flywaydb", "org.flywaydb", "flyway-core").version("9.22.3")
 
             bundle("persistence", listOf(
                 "exposed-core",
                 "exposed-jdbc",
                 "exposed-dao",
                 "exposed-kotlin-datetime",
-                "sqlite-jbdc"))
+                "sqlite-jbdc",
+                "flywaydb"))
 
             //
             // Testing
