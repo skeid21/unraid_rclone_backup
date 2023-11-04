@@ -10,7 +10,6 @@
 
 rootProject.name = "server"
 include("app")
-include("protos")
 
 plugins {
     kotlin("jvm") version "1.9.0" apply false
