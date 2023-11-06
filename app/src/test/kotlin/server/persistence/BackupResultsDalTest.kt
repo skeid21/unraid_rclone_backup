@@ -58,12 +58,6 @@ class BackupResultsDalTest(private val harness: TestHarness) {
   }
 
   @Test
-  fun canGetMostRecentResult() {
-    val expected =
-        generateSequence { subject.create(BackupResultStub.get(backupName)) }.take(5).toList()
-  }
-
-  @Test
   fun create_invalidBackupForeignKey_throws() {
     assertFailsWith<ExposedSQLException> {
       val backupNotFound = BackupName("backups/notFound")
