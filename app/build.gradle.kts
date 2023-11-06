@@ -40,17 +40,19 @@ kotlin {
     jvmToolchain(17) 
 }
 
+
 application {
     // Define the main class for the application.
     mainClass.set("server.AppMainKt")
-    //enable development mode for enhanced error page responses and hot reloading
-    applicationDefaultJvmArgs = listOf(
-        "-Dio.ktor.development=true",
-        "-Dapplication.sqlite.data_path=/tmp/com.unclone/sqlite/data.db"
-    )
-    sourceSets {
-        main {
-            resources.srcDir("/src/main/resources/dev")
-        }
+}
+
+tasks {
+    withType<JavaExec>() {
+        //jvm args for local dev set on JavaExec class and not application default args
+        //as to only affect local development.
+        jvmArguments = listOf(
+          "-Dio.ktor.development=true",
+          "-Dapplication.sqlite.data_path=/tmp/com.unclone/sqlite/data.db"
+        )
     }
 }

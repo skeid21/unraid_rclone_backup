@@ -66,7 +66,7 @@ fun ARTICLE.backupForm(backup: Backup?, formActionUrl: String?) {
             id = "sourceDir"
             name = id
             disabled = disableEditing
-            value = backup?.destinationDir ?: ""
+            value = backup?.sourceDir ?: ""
           }
           label {
             htmlFor = "sourceDir"
