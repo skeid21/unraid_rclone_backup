@@ -8,6 +8,11 @@ import kotlin.io.path.isRegularFile
 import kotlin.io.path.listDirectoryEntries
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.quartz.Job
+import org.quartz.JobExecutionContext
+import org.quartz.Scheduler
+import org.quartz.spi.JobFactory
+import org.quartz.spi.TriggerFiredBundle
 import server.TestHarness
 import server.TestHarnessExtension
 import server.models.Backup
@@ -64,6 +69,33 @@ class BackupExecutorServiceTest(private val harness: TestHarness) {
           .containsExactlyElementsIn(
               backups.map { BackupExecutorService.JobDescription(it.name, it.cronSchedule) })
     }
+  }
+
+  @Test
+  fun jobsWillNotExecuteIfPreviousRunIsInProgress() {
+
+    var shouldSleep = true
+    class FakeJob() : Job {
+      override fun execute(context: JobExecutionContext?) {
+        while (shouldSleep) {
+          Thread.sleep(10)
+        }
+      }
+    }
+    class FakeJobFactory() : JobFactory {
+      override fun newJob(bundle: TriggerFiredBundle?, scheduler: Scheduler?): Job {
+        println("+++++++ Got 1")
+        return FakeJob()
+      }
+    }
+
+    backupService.create(BackupStub.get("0/1 * * ? * *"))
+    val sut = BackupExecutorService(backupService, FakeJobFactory())
+    sut.ensureBackupJobsExist()
+
+    Thread.sleep(3000)
+
+    sut.listExecutingJobs().let { executingJobs -> assertThat(executingJobs).hasSize(1) }
   }
 
   @Test

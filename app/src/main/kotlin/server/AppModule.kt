@@ -5,10 +5,12 @@ import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.Module
 import server.persistence.DatabaseModule
+import server.services.ServicesModule
 
 class AppModule : Module {
   override fun configure(binder: Binder) {
     binder.install(DatabaseModule())
+    binder.install(ServicesModule())
   }
 }
 

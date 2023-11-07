@@ -7,6 +7,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.quartz.CronScheduleBuilder.cronSchedule
 import org.quartz.CronTrigger
+import org.quartz.DisallowConcurrentExecution
 import org.quartz.Job
 import org.quartz.JobBuilder.newJob
 import org.quartz.JobDetail
@@ -17,7 +18,7 @@ import org.quartz.Trigger
 import org.quartz.TriggerBuilder.newTrigger
 import org.quartz.impl.StdSchedulerFactory
 import org.quartz.impl.matchers.GroupMatcher
-import org.quartz.spi.JobFactory as QuartzJobFactory
+import org.quartz.spi.JobFactory
 import org.quartz.spi.TriggerFiredBundle
 import server.models.Backup
 import server.models.BackupName
@@ -38,7 +39,8 @@ constructor(private val backupService: BackupService, jobFactory: JobFactory) {
     fun trigger(triggerName: String, jobKey: JobKey, backup: Backup): Trigger =
         newTrigger()
             .withIdentity(triggerName, GROUP)
-            .withSchedule(cronSchedule("${backup.cronSchedule}"))
+            .withSchedule(
+                cronSchedule(backup.cronSchedule).withMisfireHandlingInstructionDoNothing())
             .forJob(jobKey)
             .build()
 
@@ -107,6 +109,9 @@ constructor(private val backupService: BackupService, jobFactory: JobFactory) {
 private val JobDetail.backupName: BackupName
   get() = BackupName(this.jobDataMap.getString(BackupExecutorService.BACKUP_NAME_JOB_DATA_KEY))
 
+// If a backup job is already running do not start that job again.
+// Ensures if a job is running long, another trigger of that job will not start processing.
+@DisallowConcurrentExecution
 class BackupJob
 @Inject
 constructor(
@@ -191,12 +196,12 @@ constructor(
   }
 }
 
-class JobFactory
+class BackupJobFactory
 @Inject
 constructor(
     private val backupService: BackupService,
     private val backupResultService: BackupResultService
-) : QuartzJobFactory {
+) : JobFactory {
   override fun newJob(bundle: TriggerFiredBundle, scheduler: Scheduler): Job {
     require(bundle.jobDetail.jobClass == BackupJob::class.java)
     return BackupJob(backupService, backupResultService)
