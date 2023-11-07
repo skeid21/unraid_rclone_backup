@@ -6,14 +6,13 @@ name: Docker
 # documentation.
 
 on:
-  schedule:
-    - cron: '27 2 * * *'
   push:
-    branches: [ "main" ]
     # Publish semver tags as releases.
     tags: [ 'v*.*.*' ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_run:
+    workflows: [Build]
+    types: 
+      - completed
 
 env:
   # Use docker.io for Docker Hub if empty
@@ -21,10 +20,9 @@ env:
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
 
-
 jobs:
   build:
-
+    if: ${{ (github.event_name == 'push') || github.event.workflow_run.conclusion == 'success'}}
     runs-on: ubuntu-latest
     permissions:
       contents: read
