@@ -23,6 +23,7 @@ object BackupStub {
           createTime = instantForTest(),
           displayName = Random.next(),
           cronSchedule = cronSchedule,
+          schedulePaused = false,
           sourceDir = sourceDir,
           destinationDir = destinationDir,
           config = config)

@@ -15,7 +15,7 @@ constructor(
     private val backupsDal: BackupsDal,
 ) {
 
-  fun create(backup: Backup): Backup = backupsDal.create(backup.isValidOrThrow())
+  fun create(backup: Backup): Backup = backupsDal.create(backup.trimInputs().isValidOrThrow())
 
   fun get(backupName: BackupName): Backup? = backupsDal.get(backupName)
 
@@ -24,6 +24,15 @@ constructor(
   fun update(backup: Backup): Backup? = backupsDal.update(backup.isValidOrThrow())
 
   fun delete(backupName: BackupName) = backupsDal.delete(backupName)
+
+  private fun Backup.trimInputs(): Backup =
+      copy(
+          name = BackupName(name.value.trim()),
+          displayName = displayName.trim(),
+          cronSchedule = cronSchedule.trim(),
+          sourceDir = sourceDir.trim(),
+          destinationDir = destinationDir.trim(),
+          config = config.trim())
 
   /** Will throw a [BadRequestException] if the backup is not valid */
   private fun Backup.isValidOrThrow(): Backup {

@@ -9,6 +9,7 @@ import kotlinx.html.form
 import kotlinx.html.id
 import kotlinx.html.input
 import kotlinx.html.label
+import kotlinx.html.span
 import kotlinx.html.style
 import kotlinx.html.textArea
 import server.models.Backup
@@ -36,6 +37,7 @@ fun ARTICLE.backupForm(backup: Backup?, formActionUrl: String?) {
             }
           }
         }
+
         div(classes = "input-field") {
           input(type = InputType.text) {
             id = "displayName"
@@ -48,6 +50,7 @@ fun ARTICLE.backupForm(backup: Backup?, formActionUrl: String?) {
             +"Display Name"
           }
         }
+
         div(classes = "input-field") {
           input(type = InputType.text) {
             id = "cronSchedule"
@@ -61,6 +64,17 @@ fun ARTICLE.backupForm(backup: Backup?, formActionUrl: String?) {
             +"Cron Schedule"
           }
         }
+
+        label {
+          input(type = InputType.checkBox) {
+            id = "schedulePaused"
+            name = id
+            disabled = disableEditing
+            checked = backup?.schedulePaused ?: false
+          }
+          span { +"Schedule Paused" }
+        }
+
         div(classes = "input-field") {
           input(type = InputType.text) {
             id = "sourceDir"
@@ -86,6 +100,7 @@ fun ARTICLE.backupForm(backup: Backup?, formActionUrl: String?) {
             +"Destination Dir"
           }
         }
+
         val testAreaContent = backup?.config ?: ""
         div(classes = "input-field") {
           textArea(classes = "materialize-textarea") {

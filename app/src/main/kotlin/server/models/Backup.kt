@@ -33,6 +33,8 @@ data class Backup(
     val displayName: String,
     /** A cron schedule string used to schedule the backup */
     val cronSchedule: String,
+    /** Is the backup schedule paused */
+    val schedulePaused: Boolean,
     /** The source directory that the backup should read from */
     val sourceDir: String,
     /** The destination directory that the backup should write to */

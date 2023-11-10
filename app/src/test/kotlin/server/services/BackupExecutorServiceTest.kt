@@ -99,6 +99,14 @@ class BackupExecutorServiceTest(private val harness: TestHarness) {
   }
 
   @Test
+  fun jobsWillNotScheduleIfScheduleIsPaused() {
+    backupService.create(BackupStub.get("0/1 * * ? * *").copy(schedulePaused = true))
+    subject.ensureBackupJobsExist()
+
+    assertThat(subject.listJobs()).isEmpty()
+  }
+
+  @Test
   fun jobsCronScheduleIsUpdated() {
     val backups = createBackupsForTest()
     subject.ensureBackupJobsExist()

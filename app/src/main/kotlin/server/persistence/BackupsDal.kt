@@ -21,6 +21,7 @@ object Backups : IntIdTable() {
   val createTime: Column<Instant> = timestamp("create_time")
   val displayName: Column<String> = varchar("display_name", 256)
   val cronSchedule: Column<String> = varchar("cron_schedule", 256)
+  val schedulePaused: Column<Int> = integer("schedule_paused")
   val sourceDir: Column<String> = varchar("source_dir", 4096)
   val destinationDir: Column<String> = varchar("destination_dir", 4096)
   val config: Column<String> = text("config")
@@ -34,6 +35,7 @@ class DAOBackup(id: EntityID<Int>) : IntEntity(id) {
   var createTime by Backups.createTime
   var displayName by Backups.displayName
   var cronSchedule by Backups.cronSchedule
+  var schedulePaused by Backups.schedulePaused
   var sourceDir by Backups.sourceDir
   var destinationDir by Backups.destinationDir
   var config by Backups.config
@@ -68,6 +70,7 @@ class BackupsDal @Inject constructor(private val db: Database) {
 private fun DAOBackup.update(backup: Backup) {
   displayName = backup.displayName
   cronSchedule = backup.cronSchedule
+  schedulePaused = if (backup.schedulePaused) 1 else 0
   sourceDir = backup.sourceDir
   destinationDir = backup.destinationDir
   config = backup.config
@@ -80,6 +83,7 @@ private fun DAOBackup.toBackup(): Backup =
         createTime = createTime,
         displayName = displayName,
         cronSchedule = cronSchedule,
+        schedulePaused = schedulePaused == 1,
         sourceDir = sourceDir,
         destinationDir = destinationDir,
         config = config)

@@ -46,11 +46,18 @@ constructor(private val backupService: BackupService, jobFactory: JobFactory) {
 
     val currentJobs = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(GROUP))
     for (backup in backups) {
+      if (backup.schedulePaused) {
+        continue
+      }
+
       val jobKey = JobKey("${backup.name.value}_job", GROUP)
       val triggerName = "${backup.name.value}_trigger"
       val trigger = trigger(triggerName, jobKey, backup)
 
-      if (!currentJobs.contains(jobKey)) {
+      if (currentJobs.contains(jobKey)) {
+        scheduler.rescheduleJob(trigger.key, trigger)
+        currentJobs.remove(jobKey)
+      } else {
         val job =
             newJob(BackupJob::class.java)
                 .withIdentity(jobKey)
@@ -58,13 +65,11 @@ constructor(private val backupService: BackupService, jobFactory: JobFactory) {
                 .build()
 
         scheduler.scheduleJob(job, trigger)
-      } else {
-        currentJobs.remove(jobKey)
-        scheduler.rescheduleJob(trigger.key, trigger)
       }
     }
 
     // Delete any jobs not referenced in the input backups list
+    // Or jobs which are paused
     scheduler.deleteJobs(currentJobs.toList())
   }
 

@@ -5,6 +5,7 @@ CREATE TABLE Backups (
   create_time TIMESTAMP NOT NULL,
   display_name VARCHAR(256) NOT NULL,
   cron_schedule VARCHAR(256) NOT NULL,
+  schedule_paused BOOLEAN NOT NULL,
   source_dir VARCHAR(4096) NOT NULL,
   destination_dir VARCHAR(4096) NOT NULL,
   config TEXT NOT NULL,

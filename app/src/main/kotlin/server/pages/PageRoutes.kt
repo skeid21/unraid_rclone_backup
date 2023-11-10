@@ -120,6 +120,7 @@ fun Parameters.toBackup(backup: Backup?): Backup {
       createTime = Clock.System.now(),
       displayName = displayName,
       cronSchedule = this["cronSchedule"].toString(),
+      schedulePaused = this["schedulePaused"] != null,
       sourceDir = this["sourceDir"].toString(),
       destinationDir = this["destinationDir"].toString(),
       config = this["config"].toString())

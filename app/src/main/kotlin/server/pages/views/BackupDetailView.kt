@@ -15,7 +15,9 @@ import server.pages.withBackupId
 import server.services.BackupService
 
 fun ARTICLE.backupDetailView(backupName: BackupName) {
+  val backups = getInstance<BackupService>().list()
   val backup = getInstance<BackupService>().get(backupName)
+  val backup1 = getInstance<BackupService>().get(BackupName("backups/test "))
 
   backupForm(backup, null)
   h3 { +"Backup Results" }

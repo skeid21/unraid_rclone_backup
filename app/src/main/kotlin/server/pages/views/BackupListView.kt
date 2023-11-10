@@ -5,7 +5,9 @@ import kotlinx.datetime.toLocalDateTime
 import kotlinx.html.ARTICLE
 import kotlinx.html.UL
 import kotlinx.html.a
+import kotlinx.html.classes
 import kotlinx.html.div
+import kotlinx.html.hr
 import kotlinx.html.i
 import kotlinx.html.li
 import kotlinx.html.p
@@ -37,8 +39,13 @@ private fun UL.backupListItem(backup: Backup, backupResult: BackupResult?) {
                 "Never"
               }
           p { +"Last Run: $lastRun " }
-          p { +"Last Run Result: ${backupResult?.status ?: ""}" }
+          if (backupResult != null) {
+            p { +"Last Run Result: ${backupResult.status ?: ""}" }
+          }
           p { +"Created: ${backup.createTime.toLocalDateTime(TimeZone.currentSystemDefault())}" }
+          hr {}
+          val status = if (backup.schedulePaused) "Schedule Paused" else "Scheduled"
+          p { +"Status: $status" }
         }
       }
       div(classes = "card-action") {
@@ -47,6 +54,13 @@ private fun UL.backupListItem(backup: Backup, backupResult: BackupResult?) {
           style = "margin:10px"
           i(classes = "material-icons right") { +"delete" }
           +"Delete"
+        }
+      }
+      div(classes = "card-action") {
+        val icon = if (backup.schedulePaused) "pause_circle_filled" else "pause_circle_outline"
+        val colorTent = if (backup.schedulePaused) "darken-2" else "lighten-2"
+        a(classes = "left btn-floating waves-effect indigo $colorTent") {
+          i(classes = "material-icons") { +icon }
         }
       }
     }
