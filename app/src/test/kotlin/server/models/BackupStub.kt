@@ -11,6 +11,7 @@ import server.next
 object BackupStub {
   fun get(
       cronSchedule: String = "* * * ? * *",
+      schedulePaused: Boolean = false,
       config: String = Random.next(),
       sourceDir: String =
           Paths.get(TestHarness.TESTING_TEMP_DIR, Random.next<String>())
@@ -23,7 +24,7 @@ object BackupStub {
           createTime = instantForTest(),
           displayName = Random.next(),
           cronSchedule = cronSchedule,
-          schedulePaused = false,
+          schedulePaused = schedulePaused,
           sourceDir = sourceDir,
           destinationDir = destinationDir,
           config = config)

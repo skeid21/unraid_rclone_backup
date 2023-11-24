@@ -34,43 +34,61 @@ constructor(private val backupService: BackupService, jobFactory: JobFactory) {
 
   data class JobDescription(val backupName: BackupName, val cronSchedule: String)
 
-  fun ensureBackupJobsExist() {
-    val backups = backupService.list()
-    fun trigger(triggerName: String, jobKey: JobKey, backup: Backup): Trigger =
-        newTrigger()
-            .withIdentity(triggerName, GROUP)
-            .withSchedule(
-                cronSchedule(backup.cronSchedule).withMisfireHandlingInstructionDoNothing())
-            .forJob(jobKey)
-            .build()
+  private fun BackupName.jobKey() = JobKey("${value}_job", GROUP)
 
-    val currentJobs = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(GROUP))
-    for (backup in backups) {
+  private fun BackupName.triggerName() = "${value}_trigger"
+
+  private fun Scheduler.getJobKeys() = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(GROUP))
+
+  private fun Backup.buildJobDetail(): JobDetail =
+      newJob(BackupJob::class.java)
+          .withIdentity(this.name.jobKey())
+          .usingJobData(BACKUP_NAME_JOB_DATA_KEY, name.value)
+          .build()
+
+  private fun Backup.buildTrigger(includeSchedule: Boolean = true): Trigger {
+    val builder = newTrigger().withIdentity(name.triggerName(), GROUP).forJob(name.jobKey())
+
+    if (includeSchedule) {
+      builder.withSchedule(cronSchedule(cronSchedule).withMisfireHandlingInstructionDoNothing())
+    }
+
+    return builder.build()
+  }
+
+  fun ensureBackupJobsExist() {
+    val currentJobs = scheduler.getJobKeys()
+    for (backup in backupService.list()) {
       if (backup.schedulePaused) {
         continue
       }
 
-      val jobKey = JobKey("${backup.name.value}_job", GROUP)
-      val triggerName = "${backup.name.value}_trigger"
-      val trigger = trigger(triggerName, jobKey, backup)
+      val trigger = backup.buildTrigger()
 
-      if (currentJobs.contains(jobKey)) {
+      if (currentJobs.remove(backup.name.jobKey())) {
         scheduler.rescheduleJob(trigger.key, trigger)
-        currentJobs.remove(jobKey)
       } else {
-        val job =
-            newJob(BackupJob::class.java)
-                .withIdentity(jobKey)
-                .usingJobData(BACKUP_NAME_JOB_DATA_KEY, backup.name.value)
-                .build()
-
-        scheduler.scheduleJob(job, trigger)
+        scheduler.scheduleJob(backup.buildJobDetail(), trigger)
       }
     }
 
     // Delete any jobs not referenced in the input backups list
     // Or jobs which are paused
     scheduler.deleteJobs(currentJobs.toList())
+  }
+
+  /** Runs a backup job now. */
+  fun runBackupJobNow(backupName: BackupName) {
+    val backup = backupService.get(backupName)
+    require(backup != null)
+
+    val jobKey = backup.name.jobKey()
+    scheduler.getJobKeys()
+    if (scheduler.checkExists(jobKey)) {
+      scheduler.triggerJob(jobKey)
+    } else {
+      scheduler.scheduleJob(backup.buildJobDetail(), backup.buildTrigger(false))
+    }
   }
 
   fun listJobs(): List<JobDescription> =
@@ -81,9 +99,12 @@ constructor(private val backupService: BackupService, jobFactory: JobFactory) {
             val triggers = scheduler.getTriggersOfJob(key)
             require(triggers.count() == 1)
 
-            val cronTrigger = triggers.first() as CronTrigger
-
-            JobDescription(jobDetail.backupName, cronTrigger.cronExpression)
+            val trigger = triggers.first()
+            if (trigger is CronTrigger) {
+              JobDescription(jobDetail.backupName, trigger.cronExpression)
+            } else {
+              JobDescription(jobDetail.backupName, "")
+            }
           }
           .toList()
 
