@@ -100,10 +100,11 @@ class BackupExecutorServiceTest(private val harness: TestHarness) {
 
   @Test
   fun jobsWillNotScheduleIfScheduleIsPaused() {
-    backupService.create(BackupStub.get("0/1 * * ? * *").copy(schedulePaused = true))
+    val backup = backupService.create(BackupStub.get("0/1 * * ? * *").copy(schedulePaused = true))
     subject.ensureBackupJobsExist()
 
-    assertThat(subject.listJobs()).isEmpty()
+    val jobs = subject.listJobs()
+    assertThat(jobs).hasSize(0)
   }
 
   @Test
@@ -173,6 +174,81 @@ class BackupExecutorServiceTest(private val harness: TestHarness) {
                 config = fileToFile.config))
 
     subject.ensureBackupJobsExist()
+    var backupResults = backupResultService.list(backup.name)
+    while (backupResults.isEmpty()) {
+      backupResults = backupResultService.list(backup.name)
+    }
+
+    val result = backupResults.first()
+    assertThat(result.status).isEqualTo(BackupResult.Status.Success)
+
+    val copiedFiles =
+        Path.of(fileToFile.destinationDir)
+            .listDirectoryEntries()
+            .filter { it.isRegularFile() }
+            .map { it.fileName.toString() }
+
+    assertThat(copiedFiles).containsExactlyElementsIn(fileToFile.fileNames)
+  }
+
+  @Test
+  fun backupJob_paused_canBeManuallyTriggered() {
+    val fileToFile = harness.setupLocalFileToFileConfigTest()
+    val backupService: BackupService = harness.getInstance()
+    val backupResultService: BackupResultService = harness.getInstance()
+
+    val backup =
+        backupService.create(
+            BackupStub.get(
+                // evey 5 seconds
+                cronSchedule = "0/5 * * ? * *",
+                schedulePaused = true,
+                sourceDir = fileToFile.sourceDir,
+                destinationDir = fileToFile.destinationDir,
+                config = fileToFile.config,
+            ))
+
+    subject.ensureBackupJobsExist()
+    subject.runBackupJobNow(backup.name)
+
+    var backupResults = backupResultService.list(backup.name)
+    while (backupResults.isEmpty()) {
+      backupResults = backupResultService.list(backup.name)
+    }
+
+    val result = backupResults.first()
+    assertThat(result.status).isEqualTo(BackupResult.Status.Success)
+
+    val copiedFiles =
+        Path.of(fileToFile.destinationDir)
+            .listDirectoryEntries()
+            .filter { it.isRegularFile() }
+            .map { it.fileName.toString() }
+
+    assertThat(copiedFiles).containsExactlyElementsIn(fileToFile.fileNames)
+  }
+
+  @Test
+  fun backupJob_canBeManuallyTriggered() {
+    val fileToFile = harness.setupLocalFileToFileConfigTest()
+    val backupService: BackupService = harness.getInstance()
+    val backupResultService: BackupResultService = harness.getInstance()
+
+    val backup =
+        backupService.create(
+            BackupStub.get(
+                // 10th minute of 1st hour
+                // Low chances of test running where the cron would trigger the job
+                cronSchedule = "* 10 1 ? * *",
+                schedulePaused = false,
+                sourceDir = fileToFile.sourceDir,
+                destinationDir = fileToFile.destinationDir,
+                config = fileToFile.config,
+            ))
+
+    subject.ensureBackupJobsExist()
+    subject.runBackupJobNow(backup.name)
+
     var backupResults = backupResultService.list(backup.name)
     while (backupResults.isEmpty()) {
       backupResults = backupResultService.list(backup.name)
