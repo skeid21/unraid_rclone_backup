@@ -100,11 +100,10 @@ class BackupExecutorServiceTest(private val harness: TestHarness) {
 
   @Test
   fun jobsWillNotScheduleIfScheduleIsPaused() {
-    val backup = backupService.create(BackupStub.get("0/1 * * ? * *").copy(schedulePaused = true))
+    backupService.create(BackupStub.get("0/1 * * ? * *").copy(schedulePaused = true))
     subject.ensureBackupJobsExist()
 
-    val jobs = subject.listJobs()
-    assertThat(jobs).hasSize(0)
+    assertThat(subject.listJobs()).isEmpty()
   }
 
   @Test
@@ -264,5 +263,52 @@ class BackupExecutorServiceTest(private val harness: TestHarness) {
             .map { it.fileName.toString() }
 
     assertThat(copiedFiles).containsExactlyElementsIn(fileToFile.fileNames)
+  }
+
+  @Test
+  fun canCancelRunningJob() {
+
+    val fileToFile = harness.setupLocalFileToFileConfigTest()
+    val backupService: BackupService = harness.getInstance()
+    val backupResultService: BackupResultService = harness.getInstance()
+
+    val backup =
+        backupService.create(
+            BackupStub.get(
+                // 10th minute of 1st hour
+                // Low chances of test running where the cron would trigger the job
+                cronSchedule = "* 10 1 ? * *",
+                schedulePaused = false,
+                sourceDir = fileToFile.sourceDir,
+                destinationDir = fileToFile.destinationDir,
+                config = fileToFile.config,
+            ))
+
+    subject.ensureBackupJobsExist()
+    subject.runBackupJobNow(backup.name)
+
+    var runningJobs = subject.listExecutingJobs()
+    while (runningJobs.isEmpty()) {
+      runningJobs = subject.listExecutingJobs()
+    }
+
+    subject.interruptBackupJob(backup.name)
+    var runningJobsAfterInterrupt = subject.listExecutingJobs()
+    while (runningJobsAfterInterrupt.isNotEmpty()) {
+      runningJobsAfterInterrupt = subject.listExecutingJobs()
+    }
+
+    var backupResults = backupResultService.list(backup.name)
+
+    val result = backupResults.first()
+    assertThat(result.status).isEqualTo(BackupResult.Status.Failure)
+
+    val copiedFiles =
+        Path.of(fileToFile.destinationDir)
+            .listDirectoryEntries()
+            .filter { it.isRegularFile() }
+            .map { it.fileName.toString() }
+
+    assertThat(copiedFiles.count()).isNotEqualTo(fileToFile.fileNames.count())
   }
 }

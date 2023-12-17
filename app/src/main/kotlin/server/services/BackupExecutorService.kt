@@ -3,11 +3,12 @@ package server.services
 import jakarta.inject.Inject
 import java.io.File
 import java.util.UUID
+import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import org.quartz.CronScheduleBuilder.cronSchedule
 import org.quartz.CronTrigger
 import org.quartz.DisallowConcurrentExecution
+import org.quartz.InterruptableJob
 import org.quartz.Job
 import org.quartz.JobBuilder.newJob
 import org.quartz.JobDetail
@@ -91,6 +92,14 @@ constructor(private val backupService: BackupService, jobFactory: JobFactory) {
     }
   }
 
+  /**
+   * Interrupts a running backup job causing it to stop. If the job is not running this call is a
+   * noop.
+   */
+  fun interruptBackupJob(backupName: BackupName) {
+    scheduler.interrupt(backupName.jobKey())
+  }
+
   fun listJobs(): List<JobDescription> =
       scheduler
           .getJobKeys(GroupMatcher.jobGroupEquals(GROUP))
@@ -143,7 +152,10 @@ class BackupJob
 constructor(
     private val backupService: BackupService,
     private val backupResultService: BackupResultService
-) : Job {
+) : InterruptableJob {
+
+  private val processRunner = ProcessRunner()
+
   private fun deleteExcessResults(backupName: BackupName) {
     val results = backupResultService.list(backupName)
     if (results.count() > 10) {
@@ -164,12 +176,12 @@ constructor(
         BackupResultName("${backupName.value}/backupResults/${UUID.randomUUID()}")
     val startTime = Clock.System.now()
 
-    fun createBackupResults(endTime: Instant, status: BackupResult.Status, output: String) {
+    fun createBackupResults(status: BackupResult.Status, output: String) {
       backupResultService.create(
           BackupResult(
               name = backupResultName(),
               startTime = startTime,
-              endTime = endTime,
+              endTime = Clock.System.now(),
               output = output,
               status = status))
     }
@@ -181,44 +193,37 @@ constructor(
       // write config to temp location
       configFile.writeText(backup.config)
       // TODO - remote expected the be the remote name
-      val p =
+      val pb =
           ProcessBuilder(
-                  "rclone",
-                  "--log-level=INFO",
-                  "--config",
-                  configFile.absolutePath,
-                  "sync",
-                  backup.sourceDir,
-                  "remote:${backup.destinationDir}")
-              .redirectErrorStream(true)
-              .start()
+              "rclone",
+              "--log-level=INFO",
+              "--config",
+              configFile.absolutePath,
+              "sync",
+              backup.sourceDir,
+              "remote:${backup.destinationDir}")
 
-      p.waitFor()
+      runBlocking {
+        val result = processRunner.runProcess(pb)
 
-      val output =
-          p.inputReader().let {
-            val lines = it.readLines()
-            return@let if (lines.isNotEmpty()) {
-              lines.reduce { acc, s -> acc + "\n" + s }
+        val status =
+            if (result.exitVal != 0) {
+              BackupResult.Status.Failure
             } else {
-              ""
+              BackupResult.Status.Success
             }
-          }
 
-      val status =
-          if (p.exitValue() != 0) {
-            BackupResult.Status.Failure
-          } else {
-            BackupResult.Status.Success
-          }
-
-      createBackupResults(Clock.System.now(), status, output)
+        createBackupResults(status, result.output)
+      }
     } catch (t: Throwable) {
-      createBackupResults(
-          Clock.System.now(), BackupResult.Status.Failure, t.message ?: t.javaClass.name)
+      createBackupResults(BackupResult.Status.Failure, t.message ?: t.javaClass.name)
     } finally {
       configFile.delete()
     }
+  }
+
+  override fun interrupt() {
+    processRunner.shouldCancelAndExitProcess.set(true)
   }
 }
 
