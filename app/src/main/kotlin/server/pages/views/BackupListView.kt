@@ -20,6 +20,7 @@ import server.pages.BACKUP_DELETE
 import server.pages.BACKUP_DETAIL
 import server.pages.BACKUP_NEW
 import server.pages.BACKUP_RUN
+import server.pages.BACKUP_STOP
 import server.pages.withBackupId
 import server.services.BackupExecutorService
 import server.services.BackupResultService
@@ -47,16 +48,15 @@ private fun UL.backupListItem(backup: Backup, backupResult: BackupResult?, isRun
           p { +"Status: $status" }
         }
       }
+
       div(classes = "card-action") {
-        a(classes = "right btn waves-effect indigo lighten-2") {
-          href = BACKUP_DELETE.withBackupId(backup.name)
-          style = "margin:10px"
-          i(classes = "material-icons right") { +"delete" }
-          +"Delete"
-        }
-      }
-      if (isRunning) {
-        div(classes = "card-action") {
+        if (isRunning) {
+          a(classes = "left btn-floating waves-effect indigo lighten-2") {
+            style = "margin-right: 5px"
+            href = BACKUP_STOP.withBackupId(backup.name)
+            i(classes = "material-icons") { +"stop" }
+          }
+
           div(classes = "preloader-wrapper small active") {
             div(classes = "spinner-layer spinner-indigo-only") {
               div(classes = "circle-clipper left") { div(classes = "circle") }
@@ -65,15 +65,18 @@ private fun UL.backupListItem(backup: Backup, backupResult: BackupResult?, isRun
             }
           }
           +"Running..."
-        }
-      } else {
-        div(classes = "card-action") {
-          val icon = "play_arrow"
-          val colorTent = if (isRunning) "darken-2" else "lighten-2"
-          a(classes = "left btn-floating waves-effect indigo $colorTent") {
+        } else {
+          a(classes = "left btn-floating waves-effect indigo lighten-2") {
             href = BACKUP_RUN.withBackupId(backup.name)
-            i(classes = "material-icons") { +icon }
+            i(classes = "material-icons") { +"play_arrow" }
           }
+        }
+
+        a(classes = "right btn waves-effect indigo lighten-2") {
+          href = BACKUP_DELETE.withBackupId(backup.name)
+          style = "margin:10px"
+          i(classes = "material-icons right") { +"delete" }
+          +"Delete"
         }
       }
     }

@@ -10,6 +10,7 @@ import io.ktor.server.response.respondRedirect
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
 import server.models.Backup
 import server.models.BackupName
@@ -33,6 +34,7 @@ const val BACKUP_DRYRUN = "$BACKUPS/{backup_id}/dryrun"
 const val BACKUP_EDIT = "$BACKUPS/{backup_id}/edit"
 const val BACKUP_DELETE = "$BACKUPS/{backup_id}/delete"
 const val BACKUP_RUN = "$BACKUPS/{backup_id}/run"
+const val BACKUP_STOP = "$BACKUPS/{backup_id}/stop"
 const val BACKUP_NEW = "$BACKUPS//new"
 
 val reschedule: SideEffect = {
@@ -109,9 +111,26 @@ fun Routing.installIndexPageIngress() {
     call.redirectToHome()
   }
 
+  //
+  // Run
+  //
   get(BACKUP_RUN) {
     withInstance<BackupExecutorService> {
       this.runBackupJobNow(call.parameters["backup_id"]!!.idToName())
+    }
+    call.redirectToHome()
+  }
+
+  //
+  // Stop
+  //
+  get(BACKUP_STOP) {
+    withInstance<BackupExecutorService> {
+      val backupName = call.parameters["backup_id"]!!.idToName()
+      interruptBackupJob(backupName)
+      while (listExecutingJobs().contains(backupName)) {
+        delay(500)
+      }
     }
     call.redirectToHome()
   }
