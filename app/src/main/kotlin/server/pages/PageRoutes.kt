@@ -32,6 +32,7 @@ const val BACKUP_DETAIL = "$BACKUPS/{backup_id}"
 const val BACKUP_DRYRUN = "$BACKUPS/{backup_id}/dryrun"
 const val BACKUP_EDIT = "$BACKUPS/{backup_id}/edit"
 const val BACKUP_DELETE = "$BACKUPS/{backup_id}/delete"
+const val BACKUP_RUN = "$BACKUPS/{backup_id}/run"
 const val BACKUP_NEW = "$BACKUPS//new"
 
 val reschedule: SideEffect = {
@@ -105,6 +106,13 @@ fun Routing.installIndexPageIngress() {
   //
   get(BACKUP_DELETE) {
     mutation { delete(call.parameters["backup_id"]!!.idToName()) }
+    call.redirectToHome()
+  }
+
+  get(BACKUP_RUN) {
+    withInstance<BackupExecutorService> {
+      this.runBackupJobNow(call.parameters["backup_id"]!!.idToName())
+    }
     call.redirectToHome()
   }
 }

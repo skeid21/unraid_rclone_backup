@@ -19,11 +19,13 @@ import server.models.BackupResult
 import server.pages.BACKUP_DELETE
 import server.pages.BACKUP_DETAIL
 import server.pages.BACKUP_NEW
+import server.pages.BACKUP_RUN
 import server.pages.withBackupId
+import server.services.BackupExecutorService
 import server.services.BackupResultService
 import server.services.BackupService
 
-private fun UL.backupListItem(backup: Backup, backupResult: BackupResult?) {
+private fun UL.backupListItem(backup: Backup, backupResult: BackupResult?, isRunning: Boolean) {
   li(classes = "collection-item") {
     div(classes = "card small") {
       a {
@@ -33,14 +35,11 @@ private fun UL.backupListItem(backup: Backup, backupResult: BackupResult?) {
           div(classes = "card-title") { +backup.displayName }
 
           val lastRun =
-              if (backupResult != null) {
-                backupResult.endTime.toLocalDateTime(TimeZone.currentSystemDefault())
-              } else {
-                "Never"
-              }
+              backupResult?.endTime?.toLocalDateTime(TimeZone.currentSystemDefault()) ?: "Never"
+
           p { +"Last Run: $lastRun " }
           if (backupResult != null) {
-            p { +"Last Run Result: ${backupResult.status ?: ""}" }
+            p { +"Last Run Result: ${backupResult.status}" }
           }
           p { +"Created: ${backup.createTime.toLocalDateTime(TimeZone.currentSystemDefault())}" }
           hr {}
@@ -56,11 +55,25 @@ private fun UL.backupListItem(backup: Backup, backupResult: BackupResult?) {
           +"Delete"
         }
       }
-      div(classes = "card-action") {
-        val icon = if (backup.schedulePaused) "pause_circle_filled" else "pause_circle_outline"
-        val colorTent = if (backup.schedulePaused) "darken-2" else "lighten-2"
-        a(classes = "left btn-floating waves-effect indigo $colorTent") {
-          i(classes = "material-icons") { +icon }
+      if (isRunning) {
+        div(classes = "card-action") {
+          div(classes = "preloader-wrapper small active") {
+            div(classes = "spinner-layer spinner-indigo-only") {
+              div(classes = "circle-clipper left") { div(classes = "circle") }
+              div(classes = "gap-patch") { div(classes = "circle") }
+              div(classes = "circle-clipper right") { div(classes = "circle") }
+            }
+          }
+          +"Running..."
+        }
+      } else {
+        div(classes = "card-action") {
+          val icon = "play_arrow"
+          val colorTent = if (isRunning) "darken-2" else "lighten-2"
+          a(classes = "left btn-floating waves-effect indigo $colorTent") {
+            href = BACKUP_RUN.withBackupId(backup.name)
+            i(classes = "material-icons") { +icon }
+          }
         }
       }
     }
@@ -76,7 +89,11 @@ fun ARTICLE.backupListView() {
   }
 
   val backupResultService = getInstance<BackupResultService>()
+  val runningJobs = getInstance<BackupExecutorService>().listExecutingJobs()
   ul(classes = "collection") {
-    backups.forEach { backupListItem(it, backupResultService.getMostRecentResult(it.name)) }
+    backups.forEach {
+      backupListItem(
+          it, backupResultService.getMostRecentResult(it.name), runningJobs.contains(it.name))
+    }
   }
 }
