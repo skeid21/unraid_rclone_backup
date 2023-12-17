@@ -22,7 +22,7 @@ dependencyResolutionManagement {
     }
     versionCatalogs {
         create("libs") {
-            version("kotlin", "1.9.0")
+            version("kotlin", "1.9.21")
 
             //
             //Ktor
@@ -53,7 +53,7 @@ dependencyResolutionManagement {
             //Kotlinx
             //
             version("kotlinx", "1.7.3")
-            library("kotlinx-coroutines-core", "org.jetbrains.kotlinx", "kotlinx-coroutines-core").version("1.7.3")
+            library("kotlinx-coroutines-core", "org.jetbrains.kotlinx", "kotlinx-coroutines-core").versionRef("kotlinx")
             library("kotlinx-serialization-json", "org.jetbrains.kotlinx", "kotlinx-serialization-json").version("1.6.0")
 
             bundle("kotlinx", listOf("kotlinx-coroutines-core", "kotlinx-serialization-json"))
@@ -106,11 +106,18 @@ dependencyResolutionManagement {
 
             library("ktor-server-test-host", "io.ktor", "ktor-server-test-host").versionRef("ktor")
 
-            library("kotlin-test", "org.jetbrains.kotlin", "kotlin-test").version("kotlin")
-            library("kotlin-test-junit", "org.jetbrains.kotlin", "kotlin-test-junit").versionRef("kotlin")
+            library("kotlin-test", "org.jetbrains.kotlin", "kotlin-test").versionRef("kotlin")
+            library("kotlinx-coroutine-test", "org.jetbrains.kotlinx", "kotlinx-coroutines-test").versionRef("kotlinx")
+
             library("truth", "com.google.truth", "truth").version("1.1.5")
              
-            bundle("test", listOf("junit", "junit-engine", "kotlin-test", "kotlin-test-junit", "ktor-server-test-host", "truth"))
+            bundle("test", listOf(
+                "junit",
+                "junit-engine",
+                "kotlin-test",
+                "kotlinx-coroutine-test",
+                "ktor-server-test-host",
+                "truth"))
 
             //
             // Plugins
