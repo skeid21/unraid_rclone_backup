@@ -16,6 +16,7 @@ import server.models.Backup
 
 fun ARTICLE.backupForm(backup: Backup?, formActionUrl: String?) {
   val disableEditing = formActionUrl == null
+  fun activeClass(value: Any?) = if (value != null) "active" else ""
   form(
       action = formActionUrl ?: "",
       method = FormMethod.post,
@@ -31,7 +32,7 @@ fun ARTICLE.backupForm(backup: Backup?, formActionUrl: String?) {
               disabled = true
               value = backup.name.value
             }
-            label {
+            label(classes = "active") {
               htmlFor = "name"
               +"Resource Name"
             }
@@ -45,7 +46,7 @@ fun ARTICLE.backupForm(backup: Backup?, formActionUrl: String?) {
             disabled = disableEditing
             value = backup?.displayName ?: ""
           }
-          label {
+          label(classes = activeClass(backup?.displayName)) {
             htmlFor = "displayName"
             +"Display Name"
           }
@@ -59,7 +60,7 @@ fun ARTICLE.backupForm(backup: Backup?, formActionUrl: String?) {
             value = backup?.cronSchedule ?: ""
             placeholder = "0 0 2 ? * * (Quartz CRON, Every day at 2AM)"
           }
-          label {
+          label(classes = activeClass(backup?.cronSchedule)) {
             htmlFor = "cronSchedule"
             +"Cron Schedule"
           }
@@ -82,7 +83,7 @@ fun ARTICLE.backupForm(backup: Backup?, formActionUrl: String?) {
             disabled = disableEditing
             value = backup?.sourceDir ?: ""
           }
-          label {
+          label(classes = activeClass(backup?.sourceDir)) {
             htmlFor = "sourceDir"
             +"Source Dir"
           }
@@ -95,7 +96,7 @@ fun ARTICLE.backupForm(backup: Backup?, formActionUrl: String?) {
             disabled = disableEditing
             value = backup?.destinationDir ?: ""
           }
-          label {
+          label(classes = activeClass(backup?.destinationDir)) {
             htmlFor = "destinationDir"
             +"Destination Dir"
           }
@@ -109,7 +110,7 @@ fun ARTICLE.backupForm(backup: Backup?, formActionUrl: String?) {
             disabled = disableEditing
             +testAreaContent
           }
-          label {
+          label(classes = activeClass(backup?.config)) {
             htmlFor = "config"
             +"Config"
           }
