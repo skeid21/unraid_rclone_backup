@@ -12,7 +12,7 @@ rootProject.name = "server"
 include("app")
 
 plugins {
-    kotlin("jvm") version "1.9.21" apply false
+    kotlin("jvm") version "1.9.23" apply false
     kotlin("plugin.serialization") version "1.9.21" apply false
 }
 
