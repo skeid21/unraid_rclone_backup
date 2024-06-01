@@ -12,8 +12,8 @@ rootProject.name = "server"
 include("app")
 
 plugins {
-    kotlin("jvm") version "1.9.23" apply false
-    kotlin("plugin.serialization") version "1.9.23" apply false
+    kotlin("jvm") version "2.0.0" apply false
+    kotlin("plugin.serialization") version "2.0.0" apply false
 }
 
 dependencyResolutionManagement {
@@ -22,7 +22,7 @@ dependencyResolutionManagement {
     }
     versionCatalogs {
         create("libs") {
-            version("kotlin", "1.9.21")
+            version("kotlin", "2.0.0")
 
             //
             //Ktor
