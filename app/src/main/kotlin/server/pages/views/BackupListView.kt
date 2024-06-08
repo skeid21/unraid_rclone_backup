@@ -16,8 +16,8 @@ import kotlinx.html.ul
 import server.getInstance
 import server.models.Backup
 import server.models.BackupResult
+import server.pages.BACKUP
 import server.pages.BACKUP_DELETE
-import server.pages.BACKUP_DETAIL
 import server.pages.BACKUP_NEW
 import server.pages.BACKUP_RUN
 import server.pages.BACKUP_STOP
@@ -31,7 +31,7 @@ private fun UL.backupListItem(backup: Backup, backupResult: BackupResult?, isRun
     div(classes = "card small") {
       a {
         style = "text-decoration:none; color:inherit"
-        href = BACKUP_DETAIL.withBackupId(backup.name)
+        href = BACKUP.withBackupId(backup.name)
         div(classes = "card-content") {
           div(classes = "card-title") { +backup.displayName }
 
